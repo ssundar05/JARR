@@ -1,5 +1,4 @@
 from datetime import timedelta
-from sqlalchemy.schema import ForeignKeyConstraint
 
 from lib.utils import utc_now
 from web.controllers import (ArticleController, CategoryController,

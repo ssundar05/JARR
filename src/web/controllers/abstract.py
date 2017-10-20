@@ -1,6 +1,5 @@
 import logging
 from lib.utils import utc_now
-from collections import defaultdict
 from datetime import datetime, timezone
 
 import dateutil.parser

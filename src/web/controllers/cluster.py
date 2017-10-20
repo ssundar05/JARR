@@ -5,7 +5,6 @@ from sqlalchemy import Integer, and_, func
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import exists, select
-from werkzeug.exceptions import NotFound
 
 from bootstrap import SQLITE_ENGINE, db
 from web.controllers.article import ArticleController
