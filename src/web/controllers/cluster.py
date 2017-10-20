@@ -268,7 +268,6 @@ class ClusterController(AbstractController):
                 filter_on_cat)
 
     def delete(self, obj_id, delete_articles=True):
-        from web.controllers import ArticleController
         self.update({'id': obj_id}, {'main_article_id': None}, commit=False)
         actrl = ArticleController(self.user_id)
         if delete_articles:

@@ -26,14 +26,14 @@ def populate_db():
     for k in range(2):
         article_total = 0
 
-        def to_name(u, c=None, f=None, a=None, *args):
+        def to_name(u, cat=None, feed=None, art=None, *args):
             string = "i%d %s" % (k, u.login)
-            if c:
-                string += " cat%s" % c
-            if f is not None:
-                string += " feed%s" % f
-            if a is not None:
-                string += " art%s" % a
+            if cat:
+                string += " cat%s" % cat
+            if feed is not None:
+                string += " feed%s" % feed
+            if art is not None:
+                string += " art%s" % art
             return string + ''.join(args)
         for user in (user1, user2):
             for i in range(3):
