@@ -163,14 +163,14 @@ class BaseUiTest(JarrFlaskCommon):
         self.app.post('/user/password_update/%d' % self.user.id,
                 data={'password': 'new_pass', 'password_conf': 'new_pass'})
         user = self.uctrl.get(id=self.user.id)
-        self.assertNotEquals(user.password, old_password)
+        self.assertNotEqual(user.password, old_password)
 
     def test_profile_update(self):
         data = {'email': 'not an email', 'is_admin': True}
         self.app.post('/user/profile_update/%d' % self.user2.id, data=data)
         user2 = self.uctrl.get(id=self.user2.id)
         self.assertFalse(user2.is_admin)
-        self.assertNotEquals(user2.email, 'not an email')
+        self.assertNotEqual(user2.email, 'not an email')
 
         self.uctrl.update({'id': self.user.id}, {'is_admin': True})
         data['email'], data['login'] = 'a.valid@email.fake', self.user2.login

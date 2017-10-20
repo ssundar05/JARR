@@ -1,9 +1,7 @@
-from tests.base import BaseJarrTest, JarrFlaskCommon
+from tests.base import JarrFlaskCommon
 
-import asyncio
 import logging
 import unittest
-from datetime import datetime, timezone
 
 import feedparser
 from mock import Mock, patch

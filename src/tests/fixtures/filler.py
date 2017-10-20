@@ -16,8 +16,8 @@ def populate_db():
     fcontr = FeedController()
     acontr = ArticleController()
     ccontr = CategoryController()
-    admin = ucontr.create(**{'is_admin': True, 'is_api': True,
-                             'login': 'admin', 'password': 'admin'})
+    ucontr.create(**{'is_admin': True, 'is_api': True,
+                     'login': 'admin', 'password': 'admin'})
     user1, user2 = [ucontr.create(login=name, email="%s@test.te" % name,
                                   password=name)
                     for name in ["user1", "user2"]]
