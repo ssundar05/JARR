@@ -91,6 +91,7 @@ class AbstractController:
         return obj
 
     def create(self, **attrs):
+        assert self._db_cls is not None
         assert attrs, "attributes to update must not be empty"
         if self._user_id_key is not None and self._user_id_key not in attrs:
             attrs[self._user_id_key] = self.user_id

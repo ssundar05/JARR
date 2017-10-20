@@ -170,8 +170,8 @@ def gen_recover_token():
         changed = ucontr.update({'email': form.email.data},
                                 {'renew_password_token': token})
         if not changed:
-            flash(gettext("No user with %(email)r was found",
-                          form.email.data), "danger")
+            flash(gettext("No user with %(email)r was found"
+                          % form.email.data), "danger")
         else:
             body = gettext("""Hello,
 
