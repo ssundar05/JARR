@@ -29,8 +29,7 @@ class ConstructFeedFromTest(unittest.TestCase):
 
     def test_joies_du_code(self):
         self.assertEqual(
-                {'description':
-                    "Les joies du code, l'instant GIF des développeurs !",
+                {'description': "L'instant GIF des développeurs",
                  'icon_url': 'http://ljdchost.com/ljdc-theme/favicons'
                              '/favicon.ico?v=9BK2m20LWn',
                  'link': 'http://lesjoiesducode.tumblr.com/rss',
