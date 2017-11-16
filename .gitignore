@@ -27,4 +27,4 @@ src/conf.py
 
 # node files
 node_modules
-src/web/static/js/bundle.min.js
+jarr_server/static/js/bundle.min.js

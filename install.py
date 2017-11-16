@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
-import os
-from sys import stderr, path
+from sys import stderr
 from subprocess import Popen, PIPE
 from argparse import ArgumentParser
-root = os.path.join(os.path.dirname(globals()['__file__']), 'src/')
-path.append(root)
 
-from lib import conf_handling
+from jarr_common import conf_handling
 
 LOGIN_OPTION_NAME = "CRAWLER_LOGIN"
 PASSWORD_OPTION_NAME = "CRAWLER_PASSWD"
