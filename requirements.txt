@@ -22,7 +22,7 @@ pytz==2017.2
 rauth==0.7.3
 requests==2.18.2
 SQLAlchemy==1.1.12
-TheConf==0.0.5
+the_conf==0.0.6
 
 click==6.7
 itsdangerous==0.24

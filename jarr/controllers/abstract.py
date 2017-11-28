@@ -75,7 +75,8 @@ class AbstractController:
         if self._user_id_key is not None and self.user_id \
                 and filters.get(self._user_id_key) != self.user_id:
             filters[self._user_id_key] = self.user_id
-        return self._db_cls.query.filter(*self._to_filters(**filters))
+        return session.query(self._db_cls).filter(*self._to_filters(**filters))
+
 
     def get(self, **filters):
         """Will return one single objects corresponding to filters"""

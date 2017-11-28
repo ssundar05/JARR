@@ -7,13 +7,14 @@ from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
 from jarr_common.utils import utc_now
 
-from jarr.bootstrap import conf, create_app, db
+from jarr.bootstrap import conf, Base
 from jarr.scripts.probes import ArticleProbe, FeedProbe, FeedLatenessProbe
 from jarr.controllers import FeedController, UserController
 
-application = create_app()
+from wsgi import application
+
 logger = logging.getLogger(__name__)
-Migrate(application, db)
+Migrate(application, Base)
 manager = Manager(application)
 manager.add_command('db', MigrateCommand)
 
