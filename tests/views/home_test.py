@@ -125,7 +125,7 @@ class BaseUiTest(JarrFlaskCommon):
         self.assertStatusCode(302, self.app.get('/logout'))
         self.assertStatusCode(302, self.app.get('/'))
 
-    @patch('web.views.feed.construct_feed_from')
+    @patch('jarr.views.feed.construct_feed_from')
     def test_bookmarklet(self, construct_feed_from):
         feed = {'icon_url': 'https://www.journalduhacker.net/'
                     'assets/jdh-ico-2c6c8060958bf86c28b20d0c83f1bbc5.ico',

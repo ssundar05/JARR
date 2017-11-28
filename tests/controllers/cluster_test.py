@@ -1,7 +1,8 @@
-from tests.base import BaseJarrTest
+from random import randint
 from datetime import timedelta
 from mock import patch, Mock
-from random import randint
+
+from tests.base import BaseJarrTest
 
 from jarr_common.utils import utc_now
 from jarr.controllers import (ArticleController, CategoryController,
@@ -91,7 +92,7 @@ class ClusterControllerTest(BaseJarrTest):
         cluster = ccontr.get(id=cluster.id)
         self.assertEqual(articles_count + 1, len(cluster.articles))
 
-    @patch('web.controllers.cluster.ArticleController')
+    @patch('jarr.controllers.cluster.ArticleController')
     def test_similarity_clustering(self, acontr_cls):
         cluster = Mock()
         def gen_articles(factor):

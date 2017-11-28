@@ -1,10 +1,10 @@
-from tests.base import JarrFlaskCommon
-
 import logging
 import unittest
 
 import feedparser
 from mock import Mock, patch
+
+from tests.base import JarrFlaskCommon
 
 from jarr.bootstrap import conf
 from jarr.controllers import FeedController, UserController
@@ -14,7 +14,7 @@ from jarr_crawler.http_crawler import (main as crawler, response_etag_match,
 from jarr_common.utils import to_hash
 from jarr_common.const import UNIX_START
 
-logger = logging.getLogger('web')
+logger = logging.getLogger('jarr')
 
 
 def get_first_call(query_jarr):
@@ -33,7 +33,7 @@ class CrawlerTest(JarrFlaskCommon):
         self.wait_params = {'wait_for': 1, 'max_wait': 10, 'checks': 1}
         UserController().update({'login': 'admin'}, {'is_api': True})
         self._is_secure_served \
-                = patch('web.lib.article_cleaner.is_secure_served')
+                = patch('jarr.lib.article_cleaner.is_secure_served')
         self._p_req = patch('crawler.http_crawler.requests.api.request')
         self._p_con = patch('crawler.http_crawler.construct_feed_from')
         self.is_secure_served = self._is_secure_served.start()

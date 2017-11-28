@@ -1,15 +1,16 @@
 from datetime import timedelta
 
 from jarr_common.utils import utc_now
+from jarr.bootstrap import session
 from jarr.controllers import (ArticleController, CategoryController,
                               FeedController, UserController)
 from jarr.models import User, Category, Feed, Cluster, Article, Tag, Icon
 
 
 def populate_db():
-    Cluster.query.update({'main_article_id': None})
+    session.query(Cluster).update({'main_article_id': None})
     for table in Tag, Article, Cluster, Feed, Icon, Category, User:
-        table.query.delete()
+        session.query(table).delete()
     ucontr = UserController()
     ccontr = CategoryController()
     fcontr = FeedController()

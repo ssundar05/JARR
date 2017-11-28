@@ -68,8 +68,8 @@ def set_logging(log_path=None, log_level=logging.INFO, modules=(),
                 log_format='%(asctime)s %(levelname)s %(message)s'):
 
     if not modules:
-        modules = ('root', 'bootstrap', 'runserver', 'lib',
-                   'web', 'crawler', 'manager', 'plugins')
+        modules = ('root', 'wsgi', 'manager',
+                   'jarr', 'jarr_crawler', 'jarr_common')
     if log_path:
         handler = logging.FileHandler(log_path)
     else:
@@ -90,12 +90,12 @@ def get_db_uri():
 
 
 def load_db(echo=False):
-    engine = create_engine(get_db_uri(), echo=echo,
+    new_engine = create_engine(get_db_uri(), echo=echo,
                            pool_recycle=3600, poolclass=NullPool)
-    NewBase = declarative_base(engine)
-    Session = sessionmaker(bind=engine)
+    NewBase = declarative_base(new_engine)
+    Session = sessionmaker(bind=new_engine)
     new_session = Session()
-    return new_session, NewBase
+    return new_engine, new_session, NewBase
 
 
 SQLITE_ENGINE = 'sqlite' in get_db_uri()
@@ -107,10 +107,11 @@ def is_secure_served():
 
 
 set_logging(conf.log.path, log_level=conf.log.level)
-session, Base = load_db()
+engine, session, Base = load_db()
 
 
 def init_integrations():
     from jarr_common import integrations
+    return integrations
 
 init_integrations()

@@ -20,7 +20,7 @@ class ArticleCleanerTest(unittest.TestCase):
         self.sample = SAMPLE.split('\n')
         self.url = 'https://test.te'
 
-    @patch('web.lib.article_cleaner.is_secure_served')
+    @patch('jarr.lib.article_cleaner.is_secure_served')
     def test_clean_clear(self, is_secure_served):
         is_secure_served.return_value = False
         result = clean_urls(SAMPLE, self.url).split('\n')
@@ -33,7 +33,7 @@ class ArticleCleanerTest(unittest.TestCase):
         self.assertEqual(self.sample[6], result[6])  # unchanged
         self.assertEqual('<img src="%s/relative.img"/>' % self.url, result[7])
 
-    @patch('web.lib.article_cleaner.is_secure_served')
+    @patch('jarr.lib.article_cleaner.is_secure_served')
     def test_clean_https(self, is_secure_served):
         is_secure_served.return_value = True
         result = clean_urls(SAMPLE, self.url).split('\n')
@@ -50,7 +50,7 @@ class ArticleCleanerTest(unittest.TestCase):
                 result[6])
         self.assertEqual('<img src="%s/relative.img"/>' % self.url, result[7])
 
-    @patch('web.lib.article_cleaner.is_secure_served')
+    @patch('jarr.lib.article_cleaner.is_secure_served')
     def test_clean_clear_fix_readability(self, is_secure_served):
         is_secure_served.return_value = False
         result = clean_urls(SAMPLE, self.url, True).split('\n')
@@ -64,7 +64,7 @@ class ArticleCleanerTest(unittest.TestCase):
                          ' srcset="garbage"/>', result[6])
         self.assertEqual('<img src="%s/relative.img"/>' % self.url, result[7])
 
-    @patch('web.lib.article_cleaner.is_secure_served')
+    @patch('jarr.lib.article_cleaner.is_secure_served')
     def test_clean_https_fix_readability(self, is_secure_served):
         is_secure_served.return_value = True
         result = clean_urls(SAMPLE, self.url, True).split('\n')
