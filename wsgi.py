@@ -74,15 +74,18 @@ def create_app():
         app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
     else:
         app.debug = conf.log.level <= logging.DEBUG
+    app.config['PLATFORM_URL'] = conf.platform_url
+    app.config['SECRET_KEY'] = conf.secret_key
     app.config['SERVER_NAME'] = PARSED_PLATFORM_URL.netloc
     app.config['PREFERRED_URL_SCHEME'] = PARSED_PLATFORM_URL.scheme
+
+    init_babel(app)
+    load_blueprints(app)
+    link_sqalchemy_to_app(app)
     return app
 
 
 application = create_app()
-init_babel(application)
-load_blueprints(application)
-link_sqalchemy_to_app(application)
 
 
 if __name__ == '__main__':  # pragma: no cover

@@ -8,7 +8,7 @@ from flask_login import login_user, logout_user
 from flask_testing import TestCase
 from werkzeug.exceptions import NotFound
 
-from wsgi import create_app, link_sqalchemy_to_app, load_blueprints, init_babel
+from wsgi import create_app
 from jarr.bootstrap import conf, engine, session, Base
 from jarr_common.utils import default_handler
 from tests.fixtures.filler import populate_db
@@ -24,9 +24,6 @@ class BaseJarrTest(TestCase):
 
     def create_app(self):
         self._application = create_app()
-        init_babel(self._application)
-        load_blueprints(self._application)
-        link_sqalchemy_to_app(self._application)
         return self._application
 
     def _get_from_contr(self, obj_id, user_id=None):
@@ -61,12 +58,12 @@ class BaseJarrTest(TestCase):
         self.assertRaises(NotFound, self._contr_cls(user.id).delete, obj_id)
 
     def setUp(self):
-        Base.metadata.create_all(engine)
         Base.metadata.drop_all(engine)
+        Base.metadata.create_all(engine)
         populate_db()
 
     def tearDown(self):
-        session.remove()
+        session.close()
 
 
 class JarrFlaskCommon(BaseJarrTest):
