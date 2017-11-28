@@ -86,7 +86,7 @@ class FeedControllerTest(BaseJarrTest):
             assert val <= high, "%s > %s" % (val.isoformat(), high.isoformat())
 
         def reset_all_last_retrieved():
-            last = utc_now() - timedelta(seconds=conf.FEED_MIN_EXPIRES)
+            last = utc_now() - timedelta(seconds=conf.feed.min_expires)
             fctrl.update({}, {'last_retrieved': last})
 
         count = 0

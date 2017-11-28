@@ -15,7 +15,7 @@ class InstagramIntegrationTest(unittest.TestCase):
            '&bridge=InstagramBridge&format=AtomFormat&u=jaesivsm'
 
     def setUp(self):
-        conf.PLUGINS_RSS_BRIDGE = 'https://bridge.leslibres.org/'
+        conf.plugins.rss_bridge = 'https://bridge.leslibres.org/'
 
     def test_feed_creation(self):
         original = urlsplit(self.link)

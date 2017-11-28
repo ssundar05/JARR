@@ -52,7 +52,7 @@ class ArticlesChallenge(PyAggAbstractResource):
 
 
 def load(application):
-    api = Api(application, prefix=conf.API_ROOT)
+    api = Api(application, prefix=conf.api_root)
     api.add_resource(ArticleNewAPI, '/article', endpoint='article_new.json')
     api.add_resource(ArticleAPI, '/article/<int:obj_id>',
                      endpoint='article.json')

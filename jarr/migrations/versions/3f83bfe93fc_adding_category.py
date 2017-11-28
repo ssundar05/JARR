@@ -25,7 +25,7 @@ def upgrade():
                   sa.Column('category_id', sa.Integer(), nullable=True))
     op.add_column('feed',
                   sa.Column('category_id', sa.Integer(), nullable=True))
-    if 'sqlite' not in conf.SQLALCHEMY_DATABASE_URI:
+    if 'sqlite' not in conf.sqlalchemy.db_uri:
         op.create_foreign_key(None, 'article', 'category',
                               ['category_id'], ['id'])
         op.create_foreign_key(None, 'feed', 'category',
@@ -33,7 +33,7 @@ def upgrade():
 
 
 def downgrade():
-    if 'sqlite' not in conf.SQLALCHEMY_DATABASE_URI:
+    if 'sqlite' not in conf.sqlalchemy.db_uri:
         op.drop_constraint(None, 'feed', type_='foreignkey')
         op.drop_constraint(None, 'feed', type_='foreignkey')
         op.drop_column('feed', 'category_id')

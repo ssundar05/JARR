@@ -39,23 +39,23 @@ class HeadersHandlingTest(unittest.TestCase):
                         utc_now() + timedelta(seconds=max_age))
 
     def test_extract_expires(self):
-        hours_off = int(conf.FEED_MAX_EXPIRES / 60 / 60)
+        hours_off = int(conf.feed.max_expires / 60 / 60)
         headers = {'expires': rfc_1123_utc(delta=timedelta(hours=hours_off))}
         assert_in_range(extract_feed_info(headers)['expires'],
                         utc_now() + timedelta(hours=hours_off))
 
     def test_extract_naive_expires(self):
-        ok_delta = timedelta(seconds=conf.FEED_MAX_EXPIRES / 2)
+        ok_delta = timedelta(seconds=conf.feed.max_expires / 2)
         headers = {'expires': (datetime.utcnow() + ok_delta).isoformat()}
         assert_in_range(extract_feed_info(headers)['expires'],
                         utc_now() + ok_delta)
 
     def test_lower_bound(self):
-        headers = {'cache-control': 'max-age=%d' % (conf.FEED_MIN_EXPIRES / 2)}
+        headers = {'cache-control': 'max-age=%d' % (conf.feed.min_expires / 2)}
         assert_in_range(extract_feed_info(headers)['expires'],
                 utc_now() + timedelta(seconds=conf.FEED_MIN_EXPIRES * 1.2))
 
     def test_upper_bound(self):
-        headers = {'cache-control': 'max-age=%d' % (conf.FEED_MAX_EXPIRES * 2)}
+        headers = {'cache-control': 'max-age=%d' % (conf.feed.max_expires * 2)}
         assert_in_range(extract_feed_info(headers)['expires'],
-                        utc_now() + timedelta(seconds=conf.FEED_MAX_EXPIRES))
+                        utc_now() + timedelta(seconds=conf.feed.max_expires))

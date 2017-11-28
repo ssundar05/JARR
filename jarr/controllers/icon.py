@@ -2,7 +2,7 @@ import base64
 
 from jarr_common.utils import jarr_get
 
-from jarr.bootstrap import db
+from jarr.bootstrap import session
 from jarr.models import Icon
 
 from .abstract import AbstractController
@@ -33,6 +33,6 @@ class IconController(AbstractController):
 
     def delete(self, url):
         obj = self.get(url=url)
-        db.session.delete(obj)
-        db.session.commit()
+        session.delete(obj)
+        session.commit()
         return obj

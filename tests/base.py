@@ -21,7 +21,7 @@ logger = logging.getLogger('web')
 
 class BaseJarrTest(TestCase):
     _contr_cls = None
-    SQLALCHEMY_DATABASE_URI = conf.TEST_SQLALCHEMY_DATABASE_URI
+    SQLALCHEMY_DATABASE_URI = conf.sqlalchemy.test_uri
     TESTING = True
 
     def create_app(self):
@@ -96,7 +96,7 @@ class JarrFlaskCommon(BaseJarrTest):
             kwargs['headers']['Authorization'] = 'Basic %s' % hash_
             del kwargs['user']
 
-        urn = path.join(conf.API_ROOT, *map(str, urn_parts))
+        urn = path.join(conf.api_root, *map(str, urn_parts))
         kwargs.pop('timeout', None)  # removing timeout non supported by flask
         resp = method(urn, **kwargs)
         if resp.data and resp.content_type == 'application/json':

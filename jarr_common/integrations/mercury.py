@@ -2,9 +2,10 @@ import logging
 from urllib.parse import urlencode
 
 from flask import flash
+from the_conf import TheConf
+from jarr_common import article_parsing
 from jarr_common.utils import jarr_get
 
-from jarr.bootstrap import conf, article_parsing
 from jarr.controllers.article import ArticleController
 from jarr.lib.article_cleaner import clean_urls
 
@@ -21,8 +22,9 @@ def _get_article(cluster, **kwargs):
 
 @article_parsing.connect
 def mercury_integration(sender, user, feed, cluster, **kwargs):
+    conf = TheConf()
     is_mercury_forbidden = not bool(kwargs.get('mercury_may_parse'))
-    is_mercury_unavailable = not bool(conf.PLUGINS_READABILITY_KEY or
+    is_mercury_unavailable = not bool(conf.plugins.readability_key or
                                       user.readability_key)
     parsing_auto = feed.readability_auto_parse
     parsing_triggered = bool(kwargs.get('mercury_parse'))
@@ -34,7 +36,7 @@ def mercury_integration(sender, user, feed, cluster, **kwargs):
         return
 
     url = READABILITY_PARSER + urlencode({'url': article.link})
-    key = user.readability_key or conf.PLUGINS_READABILITY_KEY
+    key = user.readability_key or conf.plugins.readability_key
     try:
         response = jarr_get(url, headers={'x-api-key': key})
         response.raise_for_status()

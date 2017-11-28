@@ -5,7 +5,7 @@ class RightMixin:
 
     @staticmethod
     def _fields_base_write():
-        return {}
+        return set()
 
     @staticmethod
     def _fields_base_read():
@@ -13,7 +13,7 @@ class RightMixin:
 
     @staticmethod
     def _fields_api_write():
-        return {}
+        return set()
 
     @staticmethod
     def _fields_api_read():

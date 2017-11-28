@@ -7,11 +7,11 @@ from urllib.parse import SplitResult, urlsplit, urlunsplit
 
 import dateutil.parser
 from requests.exceptions import MissingSchema
+from the_conf import TheConf
 
 from jarr_common.html_parsing import extract_tags, extract_title, extract_lang
 from jarr_common.utils import jarr_get, utc_now
 from jarr_common.clustering_af.word_utils import extract_valuable_tokens
-from jarr.bootstrap import conf
 from jarr.lib.article_cleaner import clean_urls
 
 logger = logging.getLogger(__name__)
@@ -112,13 +112,14 @@ def _fetch_article(link):
 
 
 def get_article_details(entry, fetch=True):
+    conf = TheConf()
     detail = {'title': html.unescape(entry.get('title', '')),
               'link': entry.get('link'),
               'tags': {tag.get('term', '').lower().strip()
                        for tag in entry.get('tags', [])
                        if tag.get('term', '').strip()}}
     missing_elm = any(not detail.get(key) for key in ('title', 'tags', 'lang'))
-    if fetch and detail['link'] and (conf.CRAWLER_RESOLV or missing_elm):
+    if fetch and detail['link'] and (conf.crawler.resolv or missing_elm):
         response = _fetch_article(detail['link'])
         if response is None:
             return detail

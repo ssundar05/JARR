@@ -83,8 +83,8 @@ class ConstructArticleTest(unittest.TestCase):
     def test_tags(self, get_stopwords, get_stemmer):
         get_stemmer.return_value = FakeStemmer()
         get_stopwords.return_value = []
-        import bootstrap
-        bootstrap.conf.CRAWLER_RESOLV = True
+        from jarr.bootstrap import conf
+        conf.crawler.resolv = True
         self.jarr_get_patch.return_value = self.response2
         article = construct_article(self.entry2, {'id': 1, 'user_id': 1})
 

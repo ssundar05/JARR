@@ -8,7 +8,7 @@ from sqlalchemy import func
 from jarr_common.utils import utc_now
 from jarr_common.article_utils import process_filters
 
-from jarr.bootstrap import db
+from jarr.bootstrap import session
 from jarr.controllers import CategoryController, FeedController
 from jarr.models import Article, User, Tag
 
@@ -30,13 +30,13 @@ class ArticleController(AbstractController):
     def count_by_feed(self, **filters):
         if self.user_id:
             filters['user_id'] = self.user_id
-        return dict(db.session.query(Article.feed_id, func.count('id'))
+        return dict(session.query(Article.feed_id, func.count('id'))
                               .filter(*self._to_filters(**filters))
                               .group_by(Article.feed_id).all())
 
     def count_by_user_id(self, **filters):
         last_conn_max = utc_now() - timedelta(days=30)
-        return dict(db.session.query(Article.user_id, func.count(Article.id))
+        return dict(session.query(Article.user_id, func.count(Article.id))
                               .filter(*self._to_filters(**filters))
                               .join(User).filter(User.is_active.__eq__(True),
                                         User.last_connection >= last_conn_max)
@@ -127,10 +127,10 @@ class ArticleController(AbstractController):
 
     def _delete(self, article, commit):
         Tag.query.filter(Tag.article_id == article.id).delete()
-        db.session.delete(article)
+        session.delete(article)
         if commit:
-            db.session.flush()
-            db.session.commit()
+            session.flush()
+            session.commit()
         return article
 
     def delete(self, obj_id, commit=True):

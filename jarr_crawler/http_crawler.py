@@ -6,8 +6,8 @@ from functools import partial
 import feedparser
 import requests
 
-from jarr.bootstrap import conf, entry_parsing
-from jarr_common import reasons
+from jarr.bootstrap import conf
+from jarr_common import reasons, entry_parsing
 from jarr_common.article_utils import construct_article, get_skip_and_ids
 from jarr_common.feed_utils import construct_feed_from, is_parsing_ok
 from jarr_common.utils import default_handler, jarr_get, to_hash, utc_now
@@ -27,13 +27,13 @@ def query_jarr(method_name, urn, auth, pool=None, data=None):
     if data is None:
         data = {}
     method = getattr(requests, method_name)
-    url = "%s%s/%s" % (conf.PLATFORM_URL, conf.API_ROOT.strip('/'), urn)
+    url = "%s%s/%s" % (conf.platform_url, conf.api_root.strip('/'), urn)
 
     future = loop.run_in_executor(None,
-            partial(method, url, auth=auth, timeout=conf.CRAWLER_TIMEOUT,
+            partial(method, url, auth=auth, timeout=conf.crawler.timeout,
                     data=json.dumps(data, default=default_handler),
                     headers={'Content-Type': 'application/json',
-                             'User-Agent': conf.CRAWLER_USER_AGENT}))
+                             'User-Agent': conf.crawler.user_agent}))
     if pool is not None:
         pool.append(future)
     return future
@@ -71,7 +71,7 @@ def set_feed_error(feed, auth, pool, error=None, parsed_feed=None):
         last_error = str(error)
     elif parsed_feed:
         last_error = str(parsed_feed.get('bozo_exception', ''))
-    if feed['error_count'] > conf.FEED_ERROR_THRESHOLD:
+    if feed['error_count'] > conf.feed.error_threshold:
         logger.warning('an error occured while fetching feed; '
                        'bumping error count to %r', error_count)
     info = {'error_count': error_count, 'last_error': last_error,

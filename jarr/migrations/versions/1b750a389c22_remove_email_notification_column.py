@@ -15,7 +15,7 @@ down_revision = '48f561c0ce6'
 
 
 def upgrade():
-    if 'sqlite' not in conf.SQLALCHEMY_DATABASE_URI:
+    if 'sqlite' not in conf.sqlalchemy.db_uri:
         op.drop_column('feed', 'email_notification')
 
 

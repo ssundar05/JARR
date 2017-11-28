@@ -13,8 +13,8 @@ def instagram_integration(sender, feed, **kwargs):
     except Exception:
         return False
 
-    split = urlsplit(conf.PLUGINS_RSS_BRIDGE) \
-            if conf.PLUGINS_RSS_BRIDGE else None
+    split = urlsplit(conf.plugins.rss_bridge) \
+            if conf.plugins.rss_bridge else None
 
     query = {'action': 'display', 'format': 'AtomFormat',
              'bridge': 'InstagramBridge', 'u': u_}

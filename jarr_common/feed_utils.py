@@ -5,12 +5,12 @@ from copy import deepcopy
 from functools import lru_cache
 
 import feedparser
+from the_conf import TheConf
 
 from jarr_common.const import FEED_ACCEPT_HEADERS, FEED_MIMETYPES
 from jarr_common.utils import jarr_get, rebuild_url
 from jarr_common.html_parsing import (extract_title, extract_icon_url,
         extract_opg_prop, extract_feed_link, try_get_icon_url)
-from jarr.bootstrap import conf
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -47,9 +47,10 @@ def _browse_feedparser_feed(feed, check, default=None):
 
 
 def get_parsed_feed(url):
+    conf = TheConf()
     try:
         fp_parsed = feedparser.parse(url,
-                request_headers={'User-Agent': conf.CRAWLER_USER_AGENT})
+                request_headers={'User-Agent': conf.crawler.user_agent})
     except Exception as error:
         logger.warning('failed to retreive that url: %r', error)
         fp_parsed = {'bozo': 1, 'feed': {}, 'entries': []}
@@ -137,11 +138,12 @@ def _fetch_url_and_enhance_feed(url, feed):
 
 
 def _is_processing_complete(feed, site_link_necessary=False):
+    site_link_ok = site_link_necessary and not feed.get('site_link')
     all_filled = all(bool(feed.get(key))
                      for key in ('link', 'title', 'icon_url'))
     # here we have all we want or we do not have the main url,
     # either way we're leaving
-    return (site_link_necessary and not feed.get('site_link')) or all_filled
+    return site_link_ok or all_filled
 
 
 @correct_feed_values

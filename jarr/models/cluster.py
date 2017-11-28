@@ -4,14 +4,16 @@ from sqlalchemy.orm import relationship
 
 from jarr_common.utils import utc_now
 from jarr_common.reasons import ReadReason
-from jarr.bootstrap import db
+from jarr.bootstrap import Base
 from jarr.models.article import Article
 from jarr.models.utc_datetime_type import UTCDateTime
 from jarr.models.right_mixin import RightMixin
 
 
-class Cluster(db.Model, RightMixin):
+class Cluster(Base, RightMixin):
     "Represent a cluster of articles from one or several feeds"
+    __tablename__ = 'cluster'
+
     id = Column(Integer, primary_key=True)
     cluster_type = Column(String)
     read = Column(Boolean, default=False)

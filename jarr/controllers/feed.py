@@ -7,14 +7,14 @@ from sqlalchemy.sql import delete, select, update
 
 from jarr_common.utils import utc_now
 
-from jarr.bootstrap import SQLITE_ENGINE, conf, db
+from jarr.bootstrap import SQLITE_ENGINE, conf, session
 from jarr.controllers.abstract import AbstractController
 from jarr.controllers.icon import IconController
 from jarr.models import Article, Cluster, Feed, User
 
 logger = logging.getLogger(__name__)
 DEFAULT_LIMIT = 0
-DEFAULT_ART_SPAN_TIME = timedelta(seconds=conf.FEED_MAX_EXPIRES)
+DEFAULT_ART_SPAN_TIME = timedelta(seconds=conf.feed.max_expires)
 
 
 class FeedController(AbstractController):
@@ -25,10 +25,10 @@ class FeedController(AbstractController):
         return ArticleController(self.user_id)
 
     def get_active_feed(self, **filters):
-        filters['error_count__lt'] = conf.FEED_ERROR_MAX
+        filters['error_count__lt'] = conf.feed.error_max
         query = self.read(enabled=True, **filters)
-        last_conn = utc_now() - timedelta(days=conf.FEED_STOP_FETCH)
-        if conf.FEED_STOP_FETCH:
+        last_conn = utc_now() - timedelta(days=conf.feed.stop_fetch)
+        if conf.feed.stop_fetch:
             return query.join(User).filter(User.is_active.__eq__(True),
                                            User.last_connection >= last_conn)
         return query
@@ -47,8 +47,8 @@ class FeedController(AbstractController):
         desactivated users are ignored.
         """
         now = utc_now()
-        max_ex = now + timedelta(seconds=conf.FEED_MAX_EXPIRES)
-        min_delta = timedelta(seconds=conf.FEED_MIN_EXPIRES)
+        max_ex = now + timedelta(seconds=conf.feed.max_expires)
+        min_delta = timedelta(seconds=conf.feed.min_expires)
         query = self.get_active_feed().filter(
                 *(self._to_filters(
                     __or__=[{'last_retrieved__lt': now - min_delta},
@@ -128,7 +128,7 @@ class FeedController(AbstractController):
                                 Article.id == Cluster.main_article_id,
                                 where_clause))\
                         .values(dict(main_feed_title=attrs['title']))
-            db.session.execute(stmt)
+            session.execute(stmt)
 
     def __update_default_expires(self, feed, attrs):
         now = utc_now()
@@ -139,7 +139,7 @@ class FeedController(AbstractController):
             else:
                 expires.append(attrs['expires'])
 
-        span_time = timedelta(seconds=conf.FEED_MAX_EXPIRES)
+        span_time = timedelta(seconds=conf.feed.max_expires)
         art_count = self.__get_art_contr().read(feed_id=feed.id,
                 retrieved_date__gt=now - span_time).count()
         expires.append(now + (span_time / (art_count or 1)))
@@ -177,7 +177,7 @@ class FeedController(AbstractController):
                                 .order_by(Article.date.asc()).limit(1)
 
         # removing articles
-        db.session.execute(delete(Article).where(
+        session.execute(delete(Article).where(
                 and_(Article.feed_id == feed.id,
                      Article.user_id == feed.user_id)))
 
@@ -193,7 +193,7 @@ class FeedController(AbstractController):
                                            Feed.user_id == feed.user_id))
                                     .order_by(Article.date.asc()).limit(1)})
         # removing remaing clusters
-        db.session.execute(delete(Cluster).where(
+        session.execute(delete(Cluster).where(
                 and_(Cluster.user_id == feed.user_id,
                      Cluster.main_article_id.__eq__(None))))
         return super().delete(obj_id)

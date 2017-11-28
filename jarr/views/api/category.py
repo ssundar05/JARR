@@ -27,7 +27,7 @@ class CategoriesAPI(PyAggResourceMulti):
 
 
 def load(application):
-    api = Api(application, prefix=conf.API_ROOT)
+    api = Api(application, prefix=conf.api_root)
     api.add_resource(CategoryNewAPI, '/category', endpoint='category_new.json')
     api.add_resource(CategoryAPI, '/category/<int:obj_id>',
                      endpoint='category.json')

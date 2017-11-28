@@ -9,7 +9,7 @@ from sqlalchemy.sql import exists, select
 from jarr_common.reasons import ClusterReason, ReadReason
 from jarr_common.clustering_af.grouper import get_best_match_and_score
 
-from jarr.bootstrap import SQLITE_ENGINE, db
+from jarr.bootstrap import SQLITE_ENGINE, session
 from jarr.controllers.article import ArticleController
 from jarr.models import Article, Cluster
 
@@ -114,9 +114,9 @@ class ClusterController(AbstractController):
             cluster.main_date = article.date
             cluster.main_feed_title = article.feed.title
             cluster.main_article_id = article.id
-        db.session.add(cluster)
-        db.session.add(article)
-        db.session.commit()
+        session.add(cluster)
+        session.add(article)
+        session.commit()
 
     def clusterize(self, article, cluster_read=None, cluster_liked=False):
         """Will add given article to a fitting cluster or create a cluster
@@ -204,16 +204,16 @@ class ClusterController(AbstractController):
         """If there's no filter to shorten the query (eg we're just selecting
         all feed with no category) we make a request more adapted to the task.
         """
-        sub_query = db.session.query(*JR_SQLA_FIELDS)\
-                              .filter(*processed_filters)\
-                              .order_by(Cluster.main_date.desc())\
-                              .limit(JR_LENGTH).cte('clu')
+        sub_query = session.query(*JR_SQLA_FIELDS)\
+                           .filter(*processed_filters)\
+                           .order_by(Cluster.main_date.desc())\
+                           .limit(JR_LENGTH).cte('clu')
 
         if SQLITE_ENGINE:  # pragma: no cover
             aggreg = func.group_concat(Article.feed_id).label('feeds_id')
         else:
             aggreg = func.array_agg(Article.feed_id).label('feeds_id')
-        query = db.session.query(sub_query, aggreg)\
+        query = session.query(sub_query, aggreg)\
                 .join(Article, Article.cluster_id == sub_query.c.id)
         if self.user_id:
             query = query.filter(Article.user_id == self.user_id)
@@ -240,7 +240,7 @@ class ClusterController(AbstractController):
         art_feed_alias, art_cat_alias = aliased(Article), aliased(Article)
         # DESC of what's going on below :
         # base query with the above fields and the aggregations
-        query = db.session.query(*self._get_selected(JR_FIELDS,
+        query = session.query(*self._get_selected(JR_FIELDS,
                 art_feed_alias, art_cat_alias, filter_on_cat))
 
         # adding parent filter, but we can't just filter on one id, because
@@ -299,7 +299,7 @@ class ClusterController(AbstractController):
     def _count_by(self, group_on, **filters):
         if self.user_id:
             filters['user_id'] = self.user_id
-        return dict(db.session.query(group_on, func.count(Article.cluster_id))
+        return dict(session.query(group_on, func.count(Article.cluster_id))
                               .outerjoin(Cluster,
                                          Article.cluster_id == Cluster.id)
                               .filter(*self._to_filters(**filters))

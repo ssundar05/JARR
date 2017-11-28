@@ -43,8 +43,8 @@ def extract_feed_info(headers, text=None):
     FEED_MIN_EXPIRES and FEED_MAX_EXPIRES.
     """
     now = utc_now()
-    min_expires = now + timedelta(seconds=conf.FEED_MIN_EXPIRES)
-    max_expires = now + timedelta(seconds=conf.FEED_MAX_EXPIRES)
+    min_expires = now + timedelta(seconds=conf.feed.min_expires)
+    max_expires = now + timedelta(seconds=conf.feed.max_expires)
 
     feed_info = {'etag': headers.get('etag', ''),
                  'last_modified': headers.get('last-modified', rfc_1123_utc())}
@@ -62,7 +62,7 @@ def extract_feed_info(headers, text=None):
                     max_expires.isoformat())
         feed_info['expires'] = max_expires
     elif feed_info['expires'] < min_expires:
-        min_exp_w_buffer = now + timedelta(seconds=conf.FEED_MIN_EXPIRES * 1.2)
+        min_exp_w_buffer = now + timedelta(seconds=conf.feed.min_expires * 1.2)
         logger.info("expiring too early, forcing expiring at %r",
                     min_exp_w_buffer.isoformat())
         feed_info['expires'] = min_exp_w_buffer
@@ -71,7 +71,7 @@ def extract_feed_info(headers, text=None):
 
 def prepare_headers(feed):
     """For a known feed, will construct some header dictionnary"""
-    headers = {'User-Agent': conf.CRAWLER_USER_AGENT,
+    headers = {'User-Agent': conf.crawler.user_agent,
                'Accept': FEED_ACCEPT_HEADERS}
     if feed.get('last_modified'):
         headers['If-Modified-Since'] = feed['last_modified']

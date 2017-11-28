@@ -5,13 +5,15 @@ from sqlalchemy.orm import relationship
 
 from jarr_common.utils import utc_now
 from jarr_common.reasons import ClusterReason
-from jarr.bootstrap import db
+from jarr.bootstrap import Base
 from jarr.models.utc_datetime_type import UTCDateTime
 from jarr.models.right_mixin import RightMixin
 
 
-class Article(db.Model, RightMixin):
+class Article(Base, RightMixin):
     "Represent an article from a feed."
+    __tablename__ = 'article'
+
     id = Column(Integer, primary_key=True)
     entry_id = Column(String)
     link = Column(String)

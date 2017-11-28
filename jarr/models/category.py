@@ -1,11 +1,13 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Index, Integer, String
 from sqlalchemy.orm import relationship
 
-from jarr.bootstrap import db
+from jarr.bootstrap import Base
 from jarr.models.right_mixin import RightMixin
 
 
-class Category(db.Model, RightMixin):
+class Category(Base, RightMixin):
+    __tablename__ = 'category'
+
     id = Column(Integer, primary_key=True)
     name = Column(String)
     cluster_on_title = Column(Boolean, default=False)

@@ -19,7 +19,7 @@ class ClustersAPI(PyAggResourceMulti):
 
 
 def load(application):
-    api = Api(application, prefix=conf.API_ROOT)
+    api = Api(application, prefix=conf.api_root)
     api.add_resource(ClusterNewAPI, '/cluster', endpoint='cluster_new.json')
     api.add_resource(ClusterAPI, '/cluster/<int:obj_id>',
                      endpoint='cluster.json')

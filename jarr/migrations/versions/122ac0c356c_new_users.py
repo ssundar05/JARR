@@ -57,7 +57,7 @@ def upgrade():
         {'login': user.c['email'], 'password': user.c['pwdhash'],
          'is_active': op.inline_literal(True),
          'last_connection': user.c['last_seen']}))
-    is_admin_val = 1 if 'sqlite' in conf.SQLALCHEMY_DATABASE_URI \
+    is_admin_val = 1 if 'sqlite' in conf.sqlalchemy.db_uri \
                      else op.inline_literal('t')
     op.get_bind().execute('UPDATE "user" SET is_admin=%s '
             'WHERE "user".id = (SELECT role.id FROM role '
@@ -73,7 +73,7 @@ def upgrade():
                     ['user_id', 'category_id'])
 
     op.drop_table('role')
-    if 'sqlite' not in conf.SQLALCHEMY_DATABASE_URI:
+    if 'sqlite' not in conf.sqlalchemy.db_uri:
         op.create_unique_constraint(None, 'user', ['login'])
         op.drop_column('user', 'last_seen')
         op.drop_column('user', 'activation_key')
@@ -94,7 +94,7 @@ def downgrade():
     op.drop_index('idc_article_uid', 'article')
     op.drop_index('idc_article_uid_cid', 'article')
     op.drop_index('idc_article_uid_fid', 'article')
-    if 'sqlite' not in conf.SQLALCHEMY_DATABASE_URI:
+    if 'sqlite' not in conf.sqlalchemy.db_uri:
         op.drop_column('user', 'password')
         op.drop_column('user', 'login')
         op.drop_column('user', 'last_connection')

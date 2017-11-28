@@ -5,8 +5,8 @@ from flask_login import current_user, login_required
 
 from jarr_common.const import UNIX_START
 from jarr_common.utils import utc_now
-from jarr_common import reasons
-from jarr.bootstrap import conf, article_parsing
+from jarr_common import reasons, article_parsing
+from jarr.bootstrap import conf
 from jarr.controllers import (CategoryController, ClusterController,
                               FeedController, UserController)
 from jarr.lib.view_utils import clusters_to_json, etag_match, get_notifications
@@ -58,9 +58,9 @@ def get_menu():
         feeds[feed.id] = feed
     return {'feeds': feeds, 'categories': categories,
             'categories_order': categories_order,
-            'crawling_method': conf.CRAWLER_TYPE,
-            'max_error': conf.FEED_ERROR_MAX,
-            'error_threshold': conf.FEED_ERROR_THRESHOLD,
+            'crawling_method': conf.crawler.type,
+            'max_error': conf.feed.error_max,
+            'error_threshold': conf.feed.error_threshold,
             'is_admin': current_user.is_admin,
             'notifications': get_notifications(),
             'all_unread_count': 0}
@@ -117,7 +117,7 @@ def get_cluster(cluster_id, parse=False, article_id=None):
     feed['icon_url'] = url_for('icon.icon', url=feed.icon_url) \
             if feed.icon_url else None
     readability_available = bool(current_user.readability_key
-                                 or conf.PLUGINS_READABILITY_KEY)
+                                 or conf.plugins.readability_key)
     cluster['main_date'] = fmt_datetime(cluster.main_date)
     article_parsing.send('get_cluster', user=current_user, feed=feed,
                          cluster=cluster,

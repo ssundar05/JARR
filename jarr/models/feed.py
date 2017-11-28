@@ -5,12 +5,14 @@ from sqlalchemy.orm import relationship, validates
 from jarr_common.utils import utc_now
 from jarr_common.const import UNIX_START
 from jarr_common.reasons import CacheReason
-from jarr.bootstrap import db
+from jarr.bootstrap import Base
 from jarr.models.utc_datetime_type import UTCDateTime
 from jarr.models.right_mixin import RightMixin
 
 
-class Feed(db.Model, RightMixin):
+class Feed(Base, RightMixin):
+    __tablename__ = 'feed'
+
     id = Column(Integer, primary_key=True)
     title = Column(String, default="")
     description = Column(String, default="")

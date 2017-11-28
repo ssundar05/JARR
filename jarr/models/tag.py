@@ -1,10 +1,12 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from jarr.bootstrap import db
+from jarr.bootstrap import Base
 
 
-class Tag(db.Model):
+class Tag(Base):
+    __tablename__ = 'tag'
+
     text = Column(String, primary_key=True, unique=False)
 
     # foreign keys

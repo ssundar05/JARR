@@ -3,18 +3,65 @@
 
 # required imports and code exection for basic functionning
 
-import calendar
 import logging
-import os
-import pytz
+import random
 from urllib.parse import urlparse
 
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm.session import sessionmaker
+from sqlalchemy.pool import NullPool
 
 from the_conf import TheConf
 
-conf = TheConf()
+conf = TheConf({'config_files': ['/etc/jarr.json', '~/.config/jarr.json'],
+        'parameters': [
+            {'jarr_testing': {'default': False, 'type': bool}},
+            {'api_root': {'default': '/api/v2.0'}},
+            {'babel': [{'timezone': {'default': 'Europe/Paris'}},
+                       {'locale': {'default': 'en_GB'}}]},
+            {'platform_url': {'default': 'http://0.0.0.0:5000'}},
+            {'sqlalchemy': [{'db_uri': {}},
+                            {'test_uri': {'default': 'sqlite:///:memory:'}}]},
+            {'secret_key': {'default': str(random.getrandbits(128))}},
+            {'bundle_js': {'default': 'http://filer.1pxsolidblack.pl/'
+                                     'public/jarr/current.min.js'}},
+            {'log': [{'level': {'default': logging.WARNING, 'type': int}},
+                     {'path': {'default': "jarr.log"}}]},
+            {'crawler': [{'login': {'default': 'admin'}},
+                         {'passwd': {'default': 'admin'}},
+                         {'nbworker': {'type': int, 'default': 2}},
+                         {'type': {'default': 'http'}},
+                         {'resolv': {'type': bool, 'default': False}},
+                         {'user_agent': {
+                             'default': 'https://github.com/jaesivsm/JARR'}},
+                         {'timeout': {'default': 30, 'type': int}}]},
+            {'plugins': [{'readability_key': {'default': ''}},
+                         {'rss_bridge': {'default': ''}}]},
+            {'auth': [{'allow_signup': {'default': True, 'type': bool}}]},
+            {'oauth': [{'allow_signup': {'default': True, 'type': bool}},
+                       {'twitter_id': {'default': ''}},
+                       {'twitter_secret': {'default': ''}},
+                       {'facebook_id': {'default': ''}},
+                       {'facebook_secret': {'default': ''}},
+                       {'google_id': {'default': ''}},
+                       {'google_secret': {'default': ''}},
+                       {'linuxfr_id': {'default': ''}},
+                       {'linuxfr_secret': {'default': ''}}]},
+            {'notification': [{'email': {'default': ''}},
+                              {'host': {'default': ''}},
+                              {'starttls': {'type': bool, 'default': True}},
+                              {'port': {'type': int, 'default': 587}},
+                              {'login': {'default': ''}},
+                              {'password': {'default': ''}}]},
+            {'feed': [{'error_max': {'type': int, 'default': 6}},
+                      {'error_threshold': {'type': int, 'default': 3}},
+                      {'min_expires': {'type': int, 'default': 60 * 10}},
+                      {'max_expires': {'type': int, 'default': 60 * 60 * 4}},
+                      {'stop_fetch': {'default': 30, 'type': int}}]},
+            {'webserver': [{'host': {'default': '0.0.0.0'}},
+                           {'port': {'default': 5000, 'type': int}}]},
+            ]})
 
 
 def set_logging(log_path=None, log_level=logging.INFO, modules=(),
@@ -37,87 +84,30 @@ def set_logging(log_path=None, log_level=logging.INFO, modules=(),
         logger.setLevel(log_level)
 
 
-SQLITE_ENGINE = 'sqlite' in conf.SQLALCHEMY_DATABASE_URI
-if os.environ.get('JARR_TESTING', False) == 'true':
-    SQLITE_ENGINE = 'sqlite' in conf.TEST_SQLALCHEMY_DATABASE_URI
-PARSED_PLATFORM_URL = urlparse(conf.PLATFORM_URL)
+def get_db_uri():
+    return conf.sqlalchemy.test_uri \
+            if conf.jarr_testing else conf.sqlalchemy.db_uri
+
+
+def load_db(echo=False):
+    engine = create_engine(get_db_uri(), echo=echo,
+                           pool_recycle=3600, poolclass=NullPool)
+    NewBase = declarative_base(engine)
+    Session = sessionmaker(bind=engine)
+    new_session = Session()
+    return new_session, NewBase
+
+
+SQLITE_ENGINE = 'sqlite' in get_db_uri()
+PARSED_PLATFORM_URL = urlparse(conf.platform_url)
 
 
 def is_secure_served():
     return PARSED_PLATFORM_URL.scheme == 'https'
 
 
-set_logging(conf.LOG_PATH, log_level=conf.LOG_LEVEL)
-db = SQLAlchemy()
-
-
-def create_app():
-    application = Flask('web')
-    application.config.from_object(conf)
-    if os.environ.get('JARR_TESTING', False) == 'true':
-        application.debug = True
-        test_db = application.config['TEST_SQLALCHEMY_DATABASE_URI']
-        assert test_db
-        application.config['SQLALCHEMY_DATABASE_URI'] = test_db
-        conf.SQLALCHEMY_DATABASE_URI = test_db
-        application.config['TESTING'] = True
-        conf.CRAWLER_NBWORKER = 1
-        application.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
-    else:
-        application.debug = conf.LOG_LEVEL <= logging.DEBUG
-    application.config['SERVER_NAME'] = PARSED_PLATFORM_URL.netloc
-    application.config['PREFERRED_URL_SCHEME'] = PARSED_PLATFORM_URL.scheme
-    db.init_app(application)
-    return application
-
-
-def init_babel(application):
-    from flask import request
-    from flask_babel import Babel
-    from babel import Locale
-
-    babel = Babel(application)
-
-    @babel.localeselector
-    def get_flask_locale():
-        from jarr_common.utils import clean_lang
-        for locale_id in request.accept_languages.values():
-            try:
-                return Locale(clean_lang(locale_id))
-            except Exception:
-                continue
-        return Locale(conf.BABEL_DEFAULT_LOCALE)
-
-    @babel.timezoneselector
-    def get_flask_timezone():
-        from flask_login import current_user
-        return pytz.timezone(current_user.timezone
-                             or conf.BABEL_DEFAULT_TIMEZONE)
-
-
-def load_blueprints(application):
-    from jarr import views
-    with application.app_context():
-        views.session_mgmt.load(application)
-        application.register_blueprint(views.articles_bp)
-        application.register_blueprint(views.cluster_bp)
-        application.register_blueprint(views.feeds_bp)
-        application.register_blueprint(views.feed_bp)
-        application.register_blueprint(views.icon_bp)
-        application.register_blueprint(views.admin_bp)
-        application.register_blueprint(views.users_bp)
-        application.register_blueprint(views.user_bp)
-        application.register_blueprint(views.session_mgmt.oauth_bp)
-        views.api.feed.load(application)
-        views.api.category.load(application)
-        views.api.cluster.load(application)
-        views.api.article.load(application)
-        views.home.load(application)
-        views.views.load(application)
-
-    application.jinja_env.filters['month_name'] \
-            = lambda n: calendar.month_name[n]
-    application.jinja_env.autoescape = False
+set_logging(conf.log.path, log_level=conf.log.level)
+session, Base = load_db()
 
 
 def init_integrations():

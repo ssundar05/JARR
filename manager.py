@@ -32,7 +32,7 @@ def db_create(login='admin', password='admin'):
 def fetch(limit=0, retreive_all=False):
     "Crawl the feeds with the client crawler."
     from jarr_crawler.http_crawler import main
-    main(conf.CRAWLER_LOGIN, conf.CRAWLER_PASSWD,
+    main(conf.crawler.login, conf.crawler.passwd,
          limit=limit, retreive_all=retreive_all)
 
 
@@ -44,7 +44,7 @@ def reset_feeds():
     feeds = [feed[0] for feed in fcontr.get_active_feed()
                                        .with_entities(fcontr._db_cls.id)]
 
-    step = timedelta(seconds=conf.FEED_MAX_EXPIRES / len(feeds))
+    step = timedelta(seconds=conf.feed.max_expires / len(feeds))
     for i, feed_id in enumerate(feeds):
         fcontr.update({'id': feed_id},
                 {'etag': '', 'last_modified': '',

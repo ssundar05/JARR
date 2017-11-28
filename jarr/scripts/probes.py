@@ -81,7 +81,7 @@ class FeedLatenessProbe(AbstractMuninPlugin):
     def iter_on_splits(self):
         offset = 2
         min_delta = timedelta(0)
-        power = math.log(conf.FEED_MAX_EXPIRES, self.split_number + offset)
+        power = math.log(conf.feed.max_expires, self.split_number + offset)
         yield 'before', None, min_delta
         for i in range(offset, self.split_number + offset):
             if i != offset:
@@ -89,7 +89,7 @@ class FeedLatenessProbe(AbstractMuninPlugin):
             else:
                 range_start = timedelta(0)
             yield i - offset, range_start, timedelta(seconds=pow(i + 1, power))
-        yield 'late', timedelta(seconds=conf.FEED_MAX_EXPIRES), None
+        yield 'late', timedelta(seconds=conf.feed.max_expires), None
 
     @staticmethod
     def _to_hour(td):

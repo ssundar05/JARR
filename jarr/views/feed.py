@@ -5,8 +5,8 @@ from flask_babel import gettext
 from flask_login import current_user, login_required
 from werkzeug.exceptions import BadRequest
 
+from jarr_common import feed_creation
 from jarr_common.feed_utils import construct_feed_from
-from jarr.bootstrap import feed_creation
 from jarr.controllers import ClusterController, FeedController
 from jarr.lib.view_utils import etag_match
 

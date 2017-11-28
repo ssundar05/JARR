@@ -5,15 +5,14 @@ from sqlalchemy import Boolean, Column, Integer, String
 from sqlalchemy.orm import relationship, validates
 
 from jarr_common.utils import utc_now
-from jarr.bootstrap import db, conf
+from jarr.bootstrap import Base, conf
 from jarr.models.utc_datetime_type import UTCDateTime
 from jarr.models.right_mixin import RightMixin
 
 
-class User(db.Model, UserMixin, RightMixin):
-    """
-    Represent a user.
-    """
+class User(Base, UserMixin, RightMixin):
+    __tablename__ = 'user'
+
     id = Column(Integer, primary_key=True)
     login = Column(String, unique=True)
     password = Column(String)
@@ -23,7 +22,7 @@ class User(db.Model, UserMixin, RightMixin):
     readability_key = Column(String, default='')
     renew_password_token = Column(String, default='')
 
-    timezone = Column(String, default=conf.BABEL_DEFAULT_TIMEZONE)
+    timezone = Column(String, default=conf.babel.timezone)
     # user rights
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)

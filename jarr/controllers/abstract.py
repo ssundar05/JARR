@@ -7,7 +7,7 @@ from sqlalchemy.ext.associationproxy import AssociationProxy
 from werkzeug.exceptions import Forbidden, NotFound
 
 from jarr_common.utils import utc_now
-from jarr.bootstrap import db
+from jarr.bootstrap import session
 
 logger = logging.getLogger(__name__)
 
@@ -99,9 +99,9 @@ class AbstractController:
                 "You must provide user_id one way or another"
 
         obj = self._db_cls(**attrs)
-        db.session.add(obj)
-        db.session.flush()
-        db.session.commit()
+        session.add(obj)
+        session.flush()
+        session.commit()
         return obj
 
     def read(self, **filters):
@@ -111,18 +111,18 @@ class AbstractController:
         assert attrs, "attributes to update must not be empty"
         result = self._get(**filters).update(attrs, synchronize_session=False)
         if commit:
-            db.session.flush()
-            db.session.commit()
+            session.flush()
+            session.commit()
         if return_objs:
             return self._get(**filters)
         return result
 
     def delete(self, obj_id, commit=True):
         obj = self.get(id=obj_id)
-        db.session.delete(obj)
+        session.delete(obj)
         if commit:
-            db.session.flush()
-            db.session.commit()
+            session.flush()
+            session.commit()
         return obj
 
     def _has_right_on(self, obj):

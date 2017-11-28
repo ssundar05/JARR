@@ -3,7 +3,7 @@ from sys import stderr
 from subprocess import Popen, PIPE
 from argparse import ArgumentParser
 
-from jarr_common import conf_handling
+from the_conf import TheConf
 
 LOGIN_OPTION_NAME = "CRAWLER_LOGIN"
 PASSWORD_OPTION_NAME = "CRAWLER_PASSWD"
@@ -91,7 +91,7 @@ def _get_conf(test, creds):
     conf, could_import_conf = None, False
     if not test:
         try:
-            conf = conf_handling.ConfObject()
+            conf = TheConf()
             conf.reload()
             could_import_conf = True
         except AssertionError:
@@ -205,7 +205,7 @@ def build_bundle_js(args):
 def main():
     args = parse_args()
     creds = {}
-    conf_obj = conf_handling.ConfObject()
+    conf_obj = TheConf()
     for _, key, value in build_conf(args.test, creds):
         setattr(conf_obj, key, value)
     conf_obj.write()

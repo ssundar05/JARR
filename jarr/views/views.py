@@ -12,13 +12,13 @@ logger = logging.getLogger(__name__)
 def load(application):
     @application.errorhandler(401)
     def authentication_required(error):
-        if conf.API_ROOT in request.url:
+        if conf.api_root in request.url:
             return error
         return redirect(url_for('login'))
 
     @application.errorhandler(403)
     def authentication_failed(error):
-        if conf.API_ROOT in request.url:
+        if conf.api_root in request.url:
             return error
         flash(gettext('Forbidden.'), 'error')
         return redirect(url_for('login'))

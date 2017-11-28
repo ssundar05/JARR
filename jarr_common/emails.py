@@ -22,11 +22,11 @@ def send(to="", bcc="", subject="", plaintext=""):
     msg['To'] = to
     msg.attach(MIMEText(plaintext, 'plain', 'utf-8'))
 
-    with smtplib.SMTP(host=conf.NOTIFICATION_HOST,
-                      port=conf.NOTIFICATION_PORT) as smtp:
+    with smtplib.SMTP(host=conf.notification.host,
+                      port=conf.notification.port) as smtp:
         smtp.ehlo()
-        if conf.NOTIFICATION_STARTTLS:
+        if conf.notification.starttls:
             smtp.starttls()
         smtp.ehlo()
-        smtp.login(conf.NOTIFICATION_EMAIL, conf.NOTIFICATION_PASSWORD)
-        smtp.sendmail(conf.NOTIFICATION_EMAIL, [msg['To']], msg.as_string())
+        smtp.login(conf.notification.login, conf.notification.password)
+        smtp.sendmail(conf.notification.email, [msg['To']], msg.as_string())

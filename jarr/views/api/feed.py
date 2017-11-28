@@ -32,7 +32,7 @@ class FetchableFeedAPI(PyAggAbstractResource):
 
 
 def load(application):
-    api = Api(application, prefix=conf.API_ROOT)
+    api = Api(application, prefix=conf.api_root)
 
     api.add_resource(FeedNewAPI, '/feed', endpoint='feed_new.json')
     api.add_resource(FeedAPI, '/feed/<int:obj_id>', endpoint='feed.json')

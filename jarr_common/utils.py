@@ -8,10 +8,9 @@ from datetime import datetime
 from hashlib import md5
 
 import requests
+from the_conf import TheConf
 from flask import request, url_for
 from werkzeug.exceptions import HTTPException
-
-from jarr.bootstrap import conf
 
 logger = logging.getLogger(__name__)
 RFC_1123_FORMAT = '%a, %d %b %Y %X %Z'
@@ -101,10 +100,11 @@ def redirect_url(default='home'):
 
 
 def jarr_get(url, headers=None, **kwargs):
-    def_headers = {'User-Agent': conf.CRAWLER_USER_AGENT}
+    conf = TheConf()
+    def_headers = {'User-Agent': conf.crawler.user_agent}
     if isinstance(headers, dict):
         def_headers.update(headers)
     request_kwargs = {'verify': False, 'allow_redirects': True,
-                      'timeout': conf.CRAWLER_TIMEOUT, 'headers': def_headers}
+                      'timeout': conf.crawler.timeout, 'headers': def_headers}
     request_kwargs.update(kwargs)
     return requests.get(url, **request_kwargs)

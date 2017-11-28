@@ -53,7 +53,7 @@ class CrawlerTest(JarrFlaskCommon):
                 resp.raise_for_status.return_value = self.resp_raise
                 return resp
 
-            url = url.split(conf.API_ROOT)[1].strip('/')
+            url = url.split(conf.api_root)[1].strip('/')
             kwargs.pop('allow_redirects', None)
             kwargs.pop('params', None)
             kwargs.pop('json', None)

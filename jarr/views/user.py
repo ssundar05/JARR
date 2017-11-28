@@ -99,7 +99,7 @@ def _get_profile_and_pass_form(user_id):
     user_id, ucontr = get_contr_and_id(user_id)
     usr = ucontr.get(id=user_id)
     profile_form, pass_form = ProfileForm(obj=usr), PasswordModForm()
-    profile_form.timezone.default = usr.timezone or conf.BABEL_DEFAULT_TIMEZONE
+    profile_form.timezone.default = usr.timezone or conf.babel.timezone
     return usr, ucontr, profile_form, pass_form
 
 
@@ -183,10 +183,10 @@ account, otherwise, disregard this email.
 
 Regards,
 
-The JARR administrator""", plateform=conf.PLATFORM_URL,
+The JARR administrator""", plateform=conf.platform_url,
                     renew_password_link=url_for('user.recover',
                         token=token, _external=True))
-            emails.send(to=form.email.data, bcc=conf.NOTIFICATION_EMAIL,
+            emails.send(to=form.email.data, bcc=conf.notification.email,
                         subject="[jarr] Password renew", plaintext=body)
             flash(gettext("A mail has been sent with a token to renew your "
                           "password"), "info")
