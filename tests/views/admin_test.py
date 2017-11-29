@@ -1,5 +1,3 @@
-from flask_principal import PermissionDenied
-
 from tests.base import JarrFlaskCommon
 from jarr.controllers import UserController
 
@@ -57,8 +55,8 @@ class BaseUiTest(JarrFlaskCommon):
         self.assertTrue(self.uctrl.get(id=self.user2.id).is_active)
         self.assertFalse(self.user.is_admin)
         self.login(self.user)
-        self.assertRaises(PermissionDenied,
-                self.app.get, '/admin/toggle_user/%d' % self.user2.id)
+        self.assertStatusCode(403,
+                self.app.get('/admin/toggle_user/%d' % self.user2.id))
         self.logout()
         self.assertTrue(self.uctrl.get(id=self.user.id).is_active)
         self.assertTrue(self.uctrl.get(id=self.user2.id).is_active)
