@@ -8,7 +8,6 @@ from datetime import datetime
 from hashlib import md5
 
 import requests
-from the_conf import TheConf
 from flask import request, url_for
 from werkzeug.exceptions import HTTPException
 
@@ -99,12 +98,11 @@ def redirect_url(default='home'):
     return request.args.get('next') or request.referrer or url_for(default)
 
 
-def jarr_get(url, headers=None, **kwargs):
-    conf = TheConf()
-    def_headers = {'User-Agent': conf.crawler.user_agent}
-    if isinstance(headers, dict):
+def jarr_get(url, timeout, user_agent, headers=None, **kwargs):
+    def_headers = {'User-Agent': user_agent}
+    if headers is not None:
         def_headers.update(headers)
     request_kwargs = {'verify': False, 'allow_redirects': True,
-                      'timeout': conf.crawler.timeout, 'headers': def_headers}
+                      'timeout': timeout, 'headers': def_headers}
     request_kwargs.update(kwargs)
     return requests.get(url, **request_kwargs)

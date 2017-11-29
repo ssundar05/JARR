@@ -33,8 +33,7 @@ def db_create(login='admin', password='admin'):
 def fetch(limit=0, retreive_all=False):
     "Crawl the feeds with the client crawler."
     from jarr_crawler.http_crawler import main
-    main(conf.crawler.login, conf.crawler.passwd,
-         limit=limit, retreive_all=retreive_all)
+    main(conf.crawler, limit=limit, retreive_all=retreive_all)
 
 
 @manager.command

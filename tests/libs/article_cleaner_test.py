@@ -22,12 +22,12 @@ class ConstructArticleTest(unittest.TestCase):
 
     @property
     def entry(self):
-        with open('src/tests/fixtures/article.json') as fd:
+        with open('tests/fixtures/article.json') as fd:
             return json.load(fd)
 
     @property
     def entry2(self):
-        with open('src/tests/fixtures/article-2.json') as fd:
+        with open('tests/fixtures/article-2.json') as fd:
             return json.load(fd)
 
     @staticmethod
@@ -35,7 +35,7 @@ class ConstructArticleTest(unittest.TestCase):
         resp = Response()
         resp.url = scheme + ConstructArticleTest.response_url
         resp.encoding = 'utf8'
-        with open('src/tests/fixtures/article.html') as fd:
+        with open('tests/fixtures/article.html') as fd:
             resp._content = fd.read()
         return resp
 
@@ -44,7 +44,7 @@ class ConstructArticleTest(unittest.TestCase):
         resp = Response()
         resp.url = 'https://www.youtube.com/watch?v=scbrjaqM3Oc'
         resp.encoding = 'utf8'
-        with open('src/tests/fixtures/article-2.html') as fd:
+        with open('tests/fixtures/article-2.html') as fd:
             resp._content = fd.read()
         return resp
 

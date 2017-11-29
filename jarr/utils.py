@@ -11,10 +11,16 @@ from urllib.parse import urljoin, urlparse
 import sqlalchemy
 from flask import request
 
-from jarr import controllers
-from jarr.models import Article
+from jarr_common.utils import jarr_get as common_get
+from jarr.bootstrap import conf
 
 logger = logging.getLogger(__name__)
+
+
+def jarr_get(*args, **kwargs):
+    kwargs['timeout'] = conf.crawler.timeout
+    kwargs['user_agent'] = conf.crawler.user_agent
+    return common_get(*args, **kwargs)
 
 
 def is_safe_url(target):
@@ -42,8 +48,10 @@ def history(user_id, year=None, month=None):
     """
     Sort articles by year and month.
     """
+    from jarr.controllers import ArticleController
+    from jarr.models import Article
     articles_counter = Counter()
-    articles = controllers.ArticleController(user_id).read()
+    articles = ArticleController(user_id).read()
     if year is not None:
         articles = articles.filter(
                 sqlalchemy.extract('year', Article.date) == year)

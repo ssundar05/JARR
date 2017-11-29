@@ -5,7 +5,6 @@ from copy import deepcopy
 from functools import lru_cache
 
 import feedparser
-from the_conf import TheConf
 
 from jarr_common.const import FEED_ACCEPT_HEADERS, FEED_MIMETYPES
 from jarr_common.utils import jarr_get, rebuild_url
@@ -46,11 +45,10 @@ def _browse_feedparser_feed(feed, check, default=None):
         yield default
 
 
-def get_parsed_feed(url):
-    conf = TheConf()
+def get_parsed_feed(url, user_agent):
     try:
         fp_parsed = feedparser.parse(url,
-                request_headers={'User-Agent': conf.crawler.user_agent})
+                request_headers={'User-Agent': user_agent})
     except Exception as error:
         logger.warning('failed to retreive that url: %r', error)
         fp_parsed = {'bozo': 1, 'feed': {}, 'entries': []}
@@ -67,7 +65,7 @@ def get_splits(url, site_link=None):
     return site_split, feed_split
 
 
-def _extract_links(url, feed, fp_parsed):
+def _extract_links(url, feed, fp_parsed, user_agent):
     if is_parsing_ok(fp_parsed):
         feed['link'] = url
     else:
@@ -77,7 +75,7 @@ def _extract_links(url, feed, fp_parsed):
                 default=feed.get('link')))
         if feed['link'] and feed['link'] != url:
             # trying newly got url
-            fp_parsed = get_parsed_feed(feed['link'])
+            fp_parsed = get_parsed_feed(feed['link'], user_agent)
             if not is_parsing_ok(fp_parsed):  # didn't work, no link found
                 feed['link'] = None
         feed['site_link'] = url
@@ -115,11 +113,12 @@ def _check_and_fix_icon(url, feed, fp_parsed):
                 break
 
 
-def _fetch_url_and_enhance_feed(url, feed):
+def _fetch_url_and_enhance_feed(url, feed, timeout, user_agent):
     """trying to parse the page of the site for some rel link in the header"""
     site_split, feed_split = get_splits(url, feed.get('site_link'))
     try:
-        response = jarr_get(url, headers={'Accept': FEED_ACCEPT_HEADERS})
+        response = jarr_get(url, headers={'Accept': FEED_ACCEPT_HEADERS},
+                            timeout=timeout, user_agent=user_agent)
     except Exception as error:
         logger.warning('failed to retreive %r: %r', feed['site_link'], error)
         return feed
@@ -147,7 +146,8 @@ def _is_processing_complete(feed, site_link_necessary=False):
 
 
 @correct_feed_values
-def construct_feed_from(url=None, fp_parsed=None, feed=None):
+def construct_feed_from(url=None, fp_parsed=None, feed=None,
+                        timeout=None, user_agent=None):
     """
     Will try to construct the most complete feed dict possible.
 
@@ -161,10 +161,10 @@ def construct_feed_from(url=None, fp_parsed=None, feed=None):
 
     # we'll try to obtain our first parsing from feedparser
     if url and not fp_parsed:
-        fp_parsed = get_parsed_feed(url)
+        fp_parsed = get_parsed_feed(url, user_agent=user_agent)
     assert url is not None and fp_parsed is not None
 
-    fp_parsed = _extract_links(url, feed, fp_parsed)
+    fp_parsed = _extract_links(url, feed, fp_parsed, user_agent)
 
     if not feed.get('title'):  # not overriding user pref for title
         _update_feed_w_parsed('title', 'title', 'title_detail',
@@ -184,4 +184,5 @@ def construct_feed_from(url=None, fp_parsed=None, feed=None):
     if _is_processing_complete(feed, site_link_necessary=True):
         return feed
 
-    return _fetch_url_and_enhance_feed(feed['site_link'], feed)
+    return _fetch_url_and_enhance_feed(feed['site_link'], feed,
+                                       timeout, user_agent)

@@ -26,7 +26,7 @@ class CrawlerTest(JarrFlaskCommon):
 
     def setUp(self):
         super().setUp()
-        with open('src/tests/fixtures/example.feed.atom') as fd:
+        with open('tests/fixtures/example.feed.atom') as fd:
             self._content = fd.read()
         self.new_entries_cnt = len(feedparser.parse(self._content)['entries'])
         self.new_entries_cnt *= FeedController().read().count()

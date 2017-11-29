@@ -1,11 +1,12 @@
 import re
 import logging
+from blinker import signal
 from bs4 import BeautifulSoup
 
-from jarr_common import feed_creation, entry_parsing
 
 REDDIT_FEED = re.compile(r'^https?://www.reddit.com/r/\S+/.rss$')
 logger = logging.getLogger(__name__)
+feed_creation, entry_parsing = signal('feed_creation'), signal('entry_parsing')
 
 
 @feed_creation.connect

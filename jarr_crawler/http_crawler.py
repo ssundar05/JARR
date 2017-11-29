@@ -5,9 +5,9 @@ from functools import partial
 
 import feedparser
 import requests
+from blinker import signal
 
-from jarr.bootstrap import conf
-from jarr_common import reasons, entry_parsing
+from jarr_common import reasons
 from jarr_common.article_utils import construct_article, get_skip_and_ids
 from jarr_common.feed_utils import construct_feed_from, is_parsing_ok
 from jarr_common.utils import default_handler, jarr_get, to_hash, utc_now
@@ -15,14 +15,16 @@ from jarr_crawler.lib.headers_handling import prepare_headers, extract_feed_info
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
+entry_parsing = signal('entry_parsing')
 FUTURES = []
 
 
-def query_jarr(method_name, urn, auth, pool=None, data=None):
+def query_jarr(method_name, urn, conf, pool=None, data=None):
     """A wrapper for internal call, method should be ones you can find
     on requests (header, post, get, options, ...), urn the distant
     resources you want to access on jarr, and data, the data you wanna
     transmit."""
+    auth = conf.crawler.login, conf.crawler.passwd
     loop = asyncio.get_event_loop()
     if data is None:
         data = {}
@@ -39,15 +41,16 @@ def query_jarr(method_name, urn, auth, pool=None, data=None):
     return future
 
 
-def clean_feed(feed, auth, pool, response, parsed_feed=None, **info):
+def clean_feed(feed, conf, pool, response, parsed_feed=None, **info):
     """Will reset the errors counters on a feed that have known errors"""
     info.update(extract_feed_info(response.headers, response.text))
     info.update({'error_count': 0, 'last_error': None,
                  'last_retrieved': utc_now()})
 
     if parsed_feed is not None:  # updating feed with retrieved info
-        constructed = construct_feed_from(
-                feed['link'], parsed_feed, feed)
+        constructed = construct_feed_from(feed['link'], parsed_feed, feed,
+                timeout=conf.crawler.timeout,
+                user_agent=conf.crawler.user_agent)
         for key in 'description', 'site_link', 'icon_url':
             if constructed.get(key):
                 info[key] = constructed[key]
@@ -62,10 +65,10 @@ def clean_feed(feed, auth, pool, response, parsed_feed=None, **info):
         info['link'] = response.url
 
     if info:
-        return query_jarr('put', 'feed/%d' % feed['id'], auth, pool, info)
+        return query_jarr('put', 'feed/%d' % feed['id'], conf, pool, info)
 
 
-def set_feed_error(feed, auth, pool, error=None, parsed_feed=None):
+def set_feed_error(feed, conf, pool, error=None, parsed_feed=None):
     error_count = feed['error_count'] + 1
     if error:
         last_error = str(error)
@@ -77,7 +80,7 @@ def set_feed_error(feed, auth, pool, error=None, parsed_feed=None):
     info = {'error_count': error_count, 'last_error': last_error,
             'user_id': feed['user_id'], 'last_retrieved': utc_now()}
     info.update(extract_feed_info({}))
-    return query_jarr('put', 'feed/%d' % feed['id'], auth, pool, info)
+    return query_jarr('put', 'feed/%d' % feed['id'], conf, pool, info)
 
 
 def response_etag_match(feed, resp):
@@ -97,13 +100,13 @@ def response_calculated_etag_match(feed, resp):
     return False
 
 
-def challenge(feed, response, auth, no_resp_pool, **kwargs):
+def challenge(feed, response, conf, no_resp_pool, **kwargs):
     logger.info('cache validation failed, challenging entries')
     parsed = feedparser.parse(response.content.strip())
     if is_parsing_ok(parsed):
-        clean_feed(feed, auth, no_resp_pool, response, parsed, **kwargs)
+        clean_feed(feed, conf, no_resp_pool, response, parsed, **kwargs)
     else:
-        set_feed_error(feed, auth, no_resp_pool, parsed_feed=parsed)
+        set_feed_error(feed, conf, no_resp_pool, parsed_feed=parsed)
         return
 
     ids, entries, skipped_list = [], {}, []
@@ -111,7 +114,8 @@ def challenge(feed, response, auth, no_resp_pool, **kwargs):
         if not entry:
             continue
         entry_parsing.send('crawler', feed=feed, entry=entry)
-        skipped, entry_ids = get_skip_and_ids(entry, feed)
+        skipped, entry_ids = get_skip_and_ids(entry, feed,
+                resolv=conf.crawler.resolv)
         if skipped:
             skipped_list.append(entry_ids)
             logger.debug('skipping article')
@@ -123,10 +127,10 @@ def challenge(feed, response, auth, no_resp_pool, **kwargs):
         return
     logger.debug('found %d entries %r', len(ids), ids)
     return entries, query_jarr('get', 'articles/challenge',
-                               auth, data={'ids': ids})
+                               conf, data={'ids': ids})
 
 
-def add_articles(feed, all_entries, new_entries_ids, auth, no_resp_pool):
+def add_articles(feed, conf, all_entries, new_entries_ids, no_resp_pool):
     article_created = False
     logger.debug("%d entries wern't matched and will be created",
                  len(new_entries_ids))
@@ -134,26 +138,26 @@ def add_articles(feed, all_entries, new_entries_ids, auth, no_resp_pool):
     for id_to_create in new_entries_ids:
         article_created = True
         new_articles.append(construct_article(
-                all_entries[tuple(sorted(id_to_create.items()))], feed))
+                all_entries[tuple(sorted(id_to_create.items()))], feed,
+                resolv=conf.crawler.resolv))
         logger.info('creating %r for %r - %r', new_articles[-1].get('title'),
                     new_articles[-1].get('user_id'), id_to_create)
-    query_jarr('post', 'articles', auth, no_resp_pool, new_articles)
+    query_jarr('post', 'articles', conf, no_resp_pool, new_articles)
 
     if not article_created:
         logger.info('all article matched in db, adding nothing')
 
 
-async def crawl(username, password, **kwargs):
+async def crawl(conf, **kwargs):
     """entry point, will retreive feeds to be fetch
     and launch the whole thing"""
     logger.debug('Crawler start - retrieving fetchable feed')
     loop = asyncio.get_event_loop()
-    auth = username, password
     no_resp_pool = []
     feeds_fetching_pool = []
     challenge_pool = []
 
-    fetchables = await query_jarr('get', 'feeds/fetchable', auth, data=kwargs)
+    fetchables = await query_jarr('get', 'feeds/fetchable', conf, data=kwargs)
 
     # processes feeds that need to be fetched
     try:
@@ -177,32 +181,32 @@ async def crawl(username, password, **kwargs):
             resp = await future
             resp.raise_for_status()
         except Exception as error:
-            set_feed_error(feed, auth, no_resp_pool, error=error)
+            set_feed_error(feed, conf, no_resp_pool, error=error)
             continue
 
         # checking if cache was validated
         kwargs = {}
         if resp.status_code == 304:
             logger.info('feed responded with 304')
-            clean_feed(feed, auth, no_resp_pool, resp,
+            clean_feed(feed, conf, no_resp_pool, resp,
                        cache_type=reasons.CacheReason.status_code_304.value)
             continue
         elif resp.status_code == 226:
             logger.info('feed responded with 226')
             kwargs['cache_support_a_im'] = True
         elif response_etag_match(feed, resp):
-            clean_feed(feed, auth, no_resp_pool, resp,
+            clean_feed(feed, conf, no_resp_pool, resp,
                        cache_type=reasons.CacheReason.etag.value)
             continue
         elif response_calculated_etag_match(feed, resp):
-            clean_feed(feed, auth, no_resp_pool, resp,
+            clean_feed(feed, conf, no_resp_pool, resp,
                        cache_type=reasons.CacheReason.etag_calculated.value)
             continue
         else:
             logger.debug('etag mismatch %r != %r',
                          resp.headers.get('etag'), feed.get('etag'))
 
-        result = challenge(feed, resp, auth, no_resp_pool, **kwargs)
+        result = challenge(feed, resp, conf, no_resp_pool, **kwargs)
         if result:
             all_entries, future = result
             challenge_pool.append((future, feed, all_entries))
@@ -220,7 +224,7 @@ async def crawl(username, password, **kwargs):
             continue
 
         new_entries_ids = resp.json()
-        add_articles(feed, all_entries, new_entries_ids, auth, no_resp_pool)
+        add_articles(feed, conf, all_entries, new_entries_ids, no_resp_pool)
 
     logger.debug("awaiting for all future we're not waiting response from")
     for no_resp_future in no_resp_pool:
@@ -228,6 +232,6 @@ async def crawl(username, password, **kwargs):
     logger.info('Crawler End')
 
 
-def main(username, password, **kwargs):
+def main(conf, **kwargs):
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(crawl(username, password, **kwargs))
+    loop.run_until_complete(crawl(conf, **kwargs))

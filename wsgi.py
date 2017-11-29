@@ -56,12 +56,16 @@ def load_blueprints(app):
     app.jinja_env.autoescape = False
 
 
-def link_sqalchemy_to_app(app):
+def param_app(app):
+    @app.context_processor
+    def inject_conf():
+        return dict(jarr_conf=conf)
+
     @app.teardown_request
     def session_clear(exception=None):
         if exception and session.is_active:
             session.rollback()
-    return session_clear
+    return inject_conf, session_clear
 
 
 def create_app():
@@ -81,7 +85,7 @@ def create_app():
 
     init_babel(app)
     load_blueprints(app)
-    link_sqalchemy_to_app(app)
+    param_app(app)
     return app
 
 

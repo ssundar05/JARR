@@ -7,6 +7,7 @@ import logging
 import random
 from urllib.parse import urlparse
 
+from blinker import signal
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
@@ -111,7 +112,8 @@ engine, session, Base = load_db()
 
 
 def init_integrations():
-    from jarr_common import integrations
+    from jarr import integrations
     return integrations
+
 
 init_integrations()

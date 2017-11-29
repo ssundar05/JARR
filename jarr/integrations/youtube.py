@@ -1,8 +1,9 @@
 import re
-from jarr_common import feed_creation
+from blinker import signal
 
 CHANNEL_RE = re.compile(r'^https?://www.youtube.com/channel/')
 FEED_URL = 'https://www.youtube.com/feeds/videos.xml?channel_id='
+feed_creation = signal('feed_creation')
 
 
 @feed_creation.connect

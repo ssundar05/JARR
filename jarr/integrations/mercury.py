@@ -1,16 +1,16 @@
 import logging
+from blinker import signal
 from urllib.parse import urlencode
 
 from flask import flash
-from the_conf import TheConf
-from jarr_common import article_parsing
-from jarr_common.utils import jarr_get
-
+from jarr.utils import jarr_get
 from jarr.controllers.article import ArticleController
 from jarr.lib.article_cleaner import clean_urls
+from jarr.bootstrap import conf
 
 logger = logging.getLogger(__name__)
 READABILITY_PARSER = 'https://mercury.postlight.com/parser?'
+article_parsing = signal('article_parsing')
 
 
 def _get_article(cluster, **kwargs):
@@ -22,7 +22,6 @@ def _get_article(cluster, **kwargs):
 
 @article_parsing.connect
 def mercury_integration(sender, user, feed, cluster, **kwargs):
-    conf = TheConf()
     is_mercury_forbidden = not bool(kwargs.get('mercury_may_parse'))
     is_mercury_unavailable = not bool(conf.plugins.readability_key or
                                       user.readability_key)

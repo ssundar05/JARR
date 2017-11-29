@@ -1,9 +1,10 @@
 import re
 from urllib.parse import urlencode, urlsplit, urlunsplit, SplitResult
-from jarr_common import feed_creation
+from blinker import signal
 from jarr.bootstrap import conf
 
 INSTA_REGEX = re.compile('^https?://(www.)?instagram.com/([^ \t\n\r\f\v/]+)')
+feed_creation = signal('feed_creation')
 
 
 @feed_creation.connect

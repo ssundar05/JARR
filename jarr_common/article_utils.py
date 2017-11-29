@@ -7,7 +7,6 @@ from urllib.parse import SplitResult, urlsplit, urlunsplit
 
 import dateutil.parser
 from requests.exceptions import MissingSchema
-from the_conf import TheConf
 
 from jarr_common.html_parsing import extract_tags, extract_title, extract_lang
 from jarr_common.utils import jarr_get, utc_now
@@ -25,7 +24,7 @@ def extract_id(entry):
     return entry.get('entry_id') or entry.get('id') or entry['link']
 
 
-def construct_article(entry, feed, fields=None, fetch=True):
+def construct_article(entry, feed, fields=None, fetch=True, resolv=False):
     "Safe method to transorm a feedparser entry into an article"
     now = utc_now()
     article = {}
@@ -59,7 +58,7 @@ def construct_article(entry, feed, fields=None, fetch=True):
     push_in_article('comments', entry.get, 'comments')
     push_in_article('lang', get_entry_lang, entry)
     if fields is None or FETCHABLE_DETAILS.intersection(fields):
-        details = get_article_details(entry, fetch)
+        details = get_article_details(entry, fetch, resolv)
         for detail, value in details.items():
             if not article.get(detail):
                 push_in_article(detail, value)
@@ -111,15 +110,14 @@ def _fetch_article(link):
                     "link or title. Error: %s", link, error)
 
 
-def get_article_details(entry, fetch=True):
-    conf = TheConf()
+def get_article_details(entry, fetch=True, resolv=False):
     detail = {'title': html.unescape(entry.get('title', '')),
               'link': entry.get('link'),
               'tags': {tag.get('term', '').lower().strip()
                        for tag in entry.get('tags', [])
                        if tag.get('term', '').strip()}}
     missing_elm = any(not detail.get(key) for key in ('title', 'tags', 'lang'))
-    if fetch and detail['link'] and (conf.crawler.resolv or missing_elm):
+    if fetch and detail['link'] and (resolv or missing_elm):
         response = _fetch_article(detail['link'])
         if response is None:
             return detail
@@ -214,10 +212,11 @@ def process_filters(filters, article, only_actions=None):
     return skipped, read, liked
 
 
-def get_skip_and_ids(entry, feed):
+def get_skip_and_ids(entry, feed, resolv=False):
     entry_ids = construct_article(entry, feed,
-                {'entry_id', 'feed_id', 'user_id'}, fetch=False)
+                {'entry_id', 'feed_id', 'user_id'}, fetch=False, resolv=resolv)
     skipped, _, _ = process_filters(feed['filters'],
-            construct_article(entry, feed, {'title', 'tags'}, fetch=False),
+            construct_article(entry, feed, {'title', 'tags'},
+                              fetch=False, resolv=resolv),
             {FiltersAction.SKIP})
     return skipped, entry_ids

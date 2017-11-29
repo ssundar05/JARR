@@ -1,18 +1,20 @@
 import logging
 
+from blinker import signal
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_babel import gettext
 from flask_login import current_user, login_required
 from werkzeug.exceptions import BadRequest
 
-from jarr_common import feed_creation
 from jarr_common.feed_utils import construct_feed_from
 from jarr.controllers import ClusterController, FeedController
 from jarr.lib.view_utils import etag_match
+from jarr.bootstrap import conf
 
 logger = logging.getLogger(__name__)
 feeds_bp = Blueprint('feeds', __name__, url_prefix='/feeds')
 feed_bp = Blueprint('feed', __name__, url_prefix='/feed')
+feed_creation = signal('feed_creation')
 
 
 @feeds_bp.route('/', methods=['GET'])
@@ -55,7 +57,8 @@ def bookmarklet():
     if existing_feed:
         return redirect(url_for('home', at='f', ai=existing_feed.id))
 
-    feed = construct_feed_from(url)
+    feed = construct_feed_from(url,
+            timeout=conf.crawler.timeout, user_agent=conf.crawler.user_agent)
 
     if feed.get('link'):
         existing_feed = check_feeds(feed.get('link'))

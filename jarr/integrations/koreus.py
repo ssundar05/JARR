@@ -1,12 +1,12 @@
 import re
 from bs4 import BeautifulSoup
-
-from jarr_common import entry_parsing
+from blinker import signal
 
 KOREUS_FEED = re.compile(r'^https?://feeds.feedburner.com/Koreus-articles$')
+article_parsing = signal('article_parsing')
 
 
-@entry_parsing.connect
+@article_parsing.connect
 def koreus_integration(sender, feed, entry, **kwargs):
     is_koreus_feed = bool(KOREUS_FEED.match(feed.get('link', '')))
     has_sufficient_data = bool(entry.get('summary_detail', {}).get('value'))

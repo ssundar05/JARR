@@ -16,7 +16,7 @@ class HTMLParsingTest(unittest.TestCase):
         resp.url = 'http://www.pariszigzag.fr/paris-insolite-secret/'\
                    'les-plus-belles-boulangeries-de-paris'
         resp.encoding = 'utf8'
-        with open('src/tests/fixtures/article.html', 'rb') as fd:
+        with open('tests/fixtures/article.html', 'rb') as fd:
             resp._content = fd.read()
         return resp
 
@@ -25,7 +25,7 @@ class HTMLParsingTest(unittest.TestCase):
         resp = Response()
         resp.url = 'https://www.youtube.com/watch?v=scbrjaqM3Oc'
         resp.encoding = 'utf8'
-        with open('src/tests/fixtures/article-2.html', 'rb') as fd:
+        with open('tests/fixtures/article-2.html', 'rb') as fd:
             resp._content = fd.read()
         return resp
 

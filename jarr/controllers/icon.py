@@ -1,9 +1,8 @@
 import base64
 
-from jarr_common.utils import jarr_get
-
 from jarr.bootstrap import session
 from jarr.models import Icon
+from jarr.utils import jarr_get
 
 from .abstract import AbstractController
 
@@ -27,12 +26,14 @@ class IconController(AbstractController):
     def create(self, **attrs):
         return super().create(**self._build_from_url(attrs))
 
-    def update(self, filters, attrs, *args, **kwargs):
+    def update(self, filters, attrs, return_objs=False, commit=True):
         attrs = self._build_from_url(attrs)
-        return super().update(filters, attrs, *args, **kwargs)
+        return super().update(filters, attrs, return_objs, commit)
 
-    def delete(self, url):
-        obj = self.get(url=url)
+    def delete(self, obj_id, commit=True):
+        obj = self.get(url=obj_id)
         session.delete(obj)
-        session.commit()
+        if commit:
+            session.flush()
+            session.commit()
         return obj

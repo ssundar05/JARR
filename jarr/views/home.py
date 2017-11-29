@@ -1,11 +1,12 @@
 import logging
 
+from blinker import signal
 from flask import render_template, request, url_for
 from flask_login import current_user, login_required
 
 from jarr_common.const import UNIX_START
 from jarr_common.utils import utc_now
-from jarr_common import reasons, article_parsing
+from jarr_common import reasons
 from jarr.bootstrap import conf
 from jarr.controllers import (CategoryController, ClusterController,
                               FeedController, UserController)
@@ -13,6 +14,7 @@ from jarr.lib.view_utils import clusters_to_json, etag_match, get_notifications
 from jarr.views.common import jsonify, fmt_datetime, fmt_timedelta
 
 logger = logging.getLogger(__name__)
+article_parsing = signal('article_parsing')
 
 
 @login_required

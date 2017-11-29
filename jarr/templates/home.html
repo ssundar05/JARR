@@ -18,9 +18,9 @@
   <body>
     <section id="jarrapp" />
   </body>
-  {%if config.BUNDLE_JS == "local" %}
+  {%if jarr_conf.bundle_js == "local" %}
     <script type="text/javascript" src="{{ url_for("static", filename="js/bundle.min.js") }}"></script>
   {% else %}
-    <script type="text/javascript" src="{{ config.BUNDLE_JS }}"></script>
+    <script type="text/javascript" src="{{ jarr_conf.bundle_js }}"></script>
   {% endif %}
 </html>
