@@ -117,3 +117,4 @@ def init_integrations():
 
 
 article_parsing, feed_creation, entry_parsing, _ = init_integrations()
+print(conf.jarr_testing, get_db_uri())
