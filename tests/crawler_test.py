@@ -3,6 +3,7 @@ import unittest
 
 import feedparser
 from mock import Mock, patch
+from the_conf import TheConf
 
 from tests.base import JarrFlaskCommon
 
@@ -167,7 +168,12 @@ class CrawlerMethodsTest(unittest.TestCase):
                      'description': 'description',
                      'etag': '', 'error_count': 5, 'link': 'link'}
         self.resp = Mock(text='text', headers={}, status_code=304, history=[])
-        self.pool, self.auth = [], ('admin', 'admin')
+        self.pool = []
+        conf.crawler.login = 'admin'
+        conf.crawler.passwd = 'admin'
+
+    def tearDown(self):
+        TheConf._TheConf__instance = None
 
     def test_etag_matching_w_constructed_etag(self):
         self.feed['etag'] = 'jarr/"%s"' % to_hash('text')
@@ -186,7 +192,7 @@ class CrawlerMethodsTest(unittest.TestCase):
     @patch('jarr_crawler.http_crawler.query_jarr')
     def test_set_feed_error_w_error(self, query_jarr):
         original_error_count = self.feed['error_count']
-        set_feed_error(self.feed, self.auth, self.pool, Exception('an error'))
+        set_feed_error(self.feed, conf, self.pool, Exception('an error'))
         method, urn, data = get_first_call(query_jarr)
 
         self.assertEqual('put', method)
@@ -197,7 +203,7 @@ class CrawlerMethodsTest(unittest.TestCase):
     @patch('jarr_crawler.http_crawler.query_jarr')
     def test_set_feed_error_w_parsed(self, query_jarr):
         original_error_count = self.feed['error_count']
-        set_feed_error(self.feed, ('admin', 'admin'), self.pool,
+        set_feed_error(self.feed, conf, self.pool,
                        parsed_feed={'bozo_exception': 'an error'})
         method, urn, data = get_first_call(query_jarr)
         self.assertEqual('put', method)
@@ -207,7 +213,7 @@ class CrawlerMethodsTest(unittest.TestCase):
 
     @patch('jarr_crawler.http_crawler.query_jarr')
     def test_clean_feed(self, query_jarr):
-        clean_feed(self.feed, self.auth, self.pool, self.resp)
+        clean_feed(self.feed, conf, self.pool, self.resp)
         method, urn, data = get_first_call(query_jarr)
 
         self.assertEqual('put', method)
@@ -222,7 +228,7 @@ class CrawlerMethodsTest(unittest.TestCase):
     def test_clean_feed_update_link(self, query_jarr):
         self.resp.history.append(Mock(status_code=301))
         self.resp.url = 'new_link'
-        clean_feed(self.feed, self.auth, self.pool, self.resp)
+        clean_feed(self.feed, conf, self.pool, self.resp)
         method, urn, data = get_first_call(query_jarr)
 
         self.assertEqual('put', method)
@@ -237,7 +243,7 @@ class CrawlerMethodsTest(unittest.TestCase):
     @patch('jarr_crawler.http_crawler.query_jarr')
     def test_clean_feed_w_constructed(self, query_jarr, construct_feed_mock):
         construct_feed_mock.return_value = {'description': 'new description'}
-        clean_feed(self.feed, self.auth, self.pool, self.resp, True)
+        clean_feed(self.feed, conf, self.pool, self.resp, True)
         method, urn, data = get_first_call(query_jarr)
 
         self.assertEqual('put', method)

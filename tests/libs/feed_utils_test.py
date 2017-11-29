@@ -1,6 +1,10 @@
 import unittest
 
 from jarr_common.feed_utils import construct_feed_from
+from jarr.bootstrap import conf
+
+cff_kw = {'timeout': conf.crawler.timeout,
+          'user_agent': conf.crawler.user_agent}
 
 
 class ConstructFeedFromTest(unittest.TestCase):
@@ -15,38 +19,39 @@ class ConstructFeedFromTest(unittest.TestCase):
                 'title': 'Journal du hacker'}
 
     def test_url(self):
-        self.assertEqual(self.jdh_feed,
-                construct_feed_from('https://www.journalduhacker.net/'))
+        jh = construct_feed_from('https://www.journalduhacker.net/', **cff_kw)
+        self.assertEqual(self.jdh_feed, jh)
 
     def test_url_non_https(self):
-        self.assertEqual(self.jdh_feed,
-                construct_feed_from('http://journalduhacker.net/'))
+        jh = construct_feed_from('http://journalduhacker.net/', **cff_kw)
+        self.assertEqual(self.jdh_feed, jh)
 
     def test_url_rss(self):
         jdh_feed = self.jdh_feed
         jdh_feed['link'] = 'http://journalduhacker.net/rss'
-        self.assertEqual(jdh_feed, construct_feed_from(jdh_feed['link']))
+        jh = construct_feed_from(jdh_feed['link'], **cff_kw)
+        self.assertEqual(jdh_feed, jh)
 
     def test_joies_du_code(self):
+        joi = construct_feed_from(
+                'http://lesjoiesducode.tumblr.com/rss', **cff_kw)
         self.assertEqual(
                 {'description': "L'instant GIF des développeurs",
-                 'icon_url': 'http://ljdchost.com/ljdc-theme/favicons'
-                             '/favicon.ico?v=9BK2m20LWn',
+                 'icon_url': 'https://ljdchost.com/theme/favicons/favicon.ico',
                  'link': 'http://lesjoiesducode.tumblr.com/rss',
-                 'site_link': 'http://lesjoiesducode.fr/',
-                 'title': 'Les joies du code'},
-                construct_feed_from('http://lesjoiesducode.tumblr.com/rss'))
+                 'site_link': 'https://lesjoiesducode.fr/',
+                 'title': 'Les joies du code'}, joi)
 
     def test_apod(self):
+        nasa = construct_feed_from('http://apod.nasa.gov/', **cff_kw)
         self.assertEqual(
                 {'icon_url': 'https://apod.nasa.gov/favicon.ico',
                  'site_link': 'http://apod.nasa.gov/',
-                 'title': 'Astronomy Picture of the Day'},
-                construct_feed_from('http://apod.nasa.gov/'))
+                 'title': 'Astronomy Picture of the Day'}, nasa)
+        nasa = construct_feed_from('http://apod.nasa.gov/apod.rss', **cff_kw)
         self.assertEqual(
                 {'description': 'Astronomy Picture of the Day',
                  'icon_url': 'https://apod.nasa.gov/favicon.ico',
                  'link': 'http://apod.nasa.gov/apod.rss',
                  'site_link': 'https://apod.nasa.gov/',
-                 'title': 'APOD'},
-                construct_feed_from('http://apod.nasa.gov/apod.rss'))
+                 'title': 'APOD'}, nasa)

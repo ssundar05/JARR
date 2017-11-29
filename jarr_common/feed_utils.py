@@ -129,7 +129,8 @@ def _fetch_url_and_enhance_feed(url, feed, timeout, user_agent):
         feed['title'] = extract_title(response)
 
     if not feed.get('icon_url'):
-        feed['icon_url'] = extract_icon_url(response, site_split, feed_split)
+        feed['icon_url'] = extract_icon_url(response, site_split, feed_split,
+                                            timeout, user_agent)
 
     if not feed.get('link'):
         feed['link'] = extract_feed_link(response, feed_split)

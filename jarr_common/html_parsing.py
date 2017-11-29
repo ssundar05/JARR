@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 CHARSET_TAG = b'<meta charset='
 
 
-def try_get_icon_url(url, *splits):
+def try_get_icon_url(url, timeout, user_agent, *splits):
     for split in splits:
         if split is None:
             continue
@@ -18,7 +18,7 @@ def try_get_icon_url(url, *splits):
         response = None
         # if html in content-type, we assume it's a fancy 404 page
         try:
-            response = jarr_get(rb_url)
+            response = jarr_get(rb_url, timeout, user_agent)
             content_type = response.headers.get('content-type', '')
         except Exception:
             pass
@@ -135,21 +135,23 @@ def _check_keys(**kwargs):
     return wrapper
 
 
-def extract_icon_url(response, site_split, feed_split):
+def extract_icon_url(response, site_split, feed_split, timeout, user_agent):
     soup = get_soup(response.content, response.encoding)
     if not soup:
         return
     icons = soup.find_all(_check_keys(rel=['icon', 'shortcut']))
     if not icons:
         icons = soup.find_all(_check_keys(rel=['icon']))
-    if len(icons) >= 1:
+    if icons:
         for icon in icons:
             icon_url = try_get_icon_url(icon.attrs['href'],
+                                        timeout, user_agent,
                                         site_split, feed_split)
             if icon_url:
                 return icon_url
 
-    icon_url = try_get_icon_url('/favicon.ico', site_split, feed_split)
+    icon_url = try_get_icon_url('/favicon.ico',
+                                timeout, user_agent, site_split, feed_split)
     if icon_url:
         return icon_url
 

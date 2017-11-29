@@ -26,8 +26,8 @@ def populate_db():
     for k in range(2):
         article_total = 0
 
-        def to_name(u, cat=None, feed=None, art=None, *args):
-            string = "i%d %s" % (k, u.login)
+        def to_name(u, iter_, cat=None, feed=None, art=None, *args):
+            string = "i%d %s" % (iter_, u.login)
             if cat:
                 string += " cat%s" % cat
             if feed is not None:
@@ -40,18 +40,18 @@ def populate_db():
                 cat_id = None
                 if i:
                     cat_id = ccontr.create(user_id=user.id,
-                                        name=to_name(user, i)).id
+                                           name=to_name(user, k, i)).id
                 feed = fcontr.create(link="feed%d%d" % (k, i), user_id=user.id,
                                      category_id=cat_id,
-                                     title=to_name(user, i, i))
+                                     title=to_name(user, k, i, i))
                 for j in range(3):
-                    entry = to_name(user, i, i, j)
+                    entry = to_name(user, k, i, i, j)
                     article_total += 1
                     acontr.create(entry_id=entry,
                             link='http://test.te/%d' % article_total,
                             feed_id=feed.id, user_id=user.id,
-                            tags=[to_name(user, i, i, j, '1'),
-                                  to_name(user, i, i, j, '2')],
+                            tags=[to_name(user, k, i, i, j, '1'),
+                                  to_name(user, k, i, i, j, '2')],
                             category_id=cat_id, title=entry,
                             date=now + timedelta(seconds=k),
                             content="content %d" % article_total)

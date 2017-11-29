@@ -62,7 +62,9 @@ class HTMLParsingTest(unittest.TestCase):
         split = urllib.parse.urlsplit(self.article.url)
         self.assertEqual('http://www.pariszigzag.fr/wp-content/themes'
                           '/paris_zigzag_2016/favicon.ico',
-                          extract_icon_url(self.article, split, split))
+                          extract_icon_url(self.article, split, split,
+                                           timeout=30, user_agent='jarr'))
         split = urllib.parse.urlsplit(self.article2.url)
         self.assertEqual('https://s.ytimg.com/yts/img/favicon-vflz7uhzw.ico',
-                          extract_icon_url(self.article2, split, split))
+                          extract_icon_url(self.article2, split, split,
+                                           timeout=30, user_agent='jarr'))
