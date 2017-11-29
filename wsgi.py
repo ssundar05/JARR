@@ -73,7 +73,6 @@ def create_app():
     if conf.jarr_testing:
         app.debug = True
         app.config['TESTING'] = True
-        conf.crawler.nbworker = 1
         app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
     else:
         app.debug = conf.log.level <= logging.DEBUG

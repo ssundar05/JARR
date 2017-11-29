@@ -31,7 +31,6 @@ conf = TheConf({'config_files': ['/etc/jarr.json', '~/.config/jarr.json'],
                      {'path': {'default': "jarr.log"}}]},
             {'crawler': [{'login': {'default': 'admin'}},
                          {'passwd': {'default': 'admin'}},
-                         {'nbworker': {'type': int, 'default': 2}},
                          {'type': {'default': 'http'}},
                          {'resolv': {'type': bool, 'default': False}},
                          {'user_agent': {
