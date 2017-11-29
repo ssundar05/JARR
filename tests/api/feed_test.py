@@ -102,7 +102,7 @@ class FeedApiTest(JarrFlaskCommon, ApiCommon):
         category = resp.json()[0]
         resp = self._api('put', self.urn, obj['id'],
                          data={'category_id': category['id']}, user='user1')
-        self.assertStatusCode(400, resp)
+        self.assertStatusCode(403, resp)
 
     def test_edit_time(self):
         now = utc_now()

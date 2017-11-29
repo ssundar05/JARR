@@ -4,6 +4,7 @@ from datetime import timedelta
 
 import sqlalchemy
 from sqlalchemy import func
+from werkzeug.exceptions import Unauthorized, Forbidden
 
 from jarr_common.utils import utc_now
 from jarr_common.article_utils import process_filters
@@ -46,12 +47,13 @@ class ArticleController(AbstractController):
         from jarr.controllers.cluster import ClusterController
         cluster_contr = ClusterController(self.user_id)
         # handling special denorm for article rights
-        assert 'feed_id' in attrs, "must provide feed_id when creating article"
+        if 'feed_id' not in attrs:
+            raise Unauthorized("must provide feed_id when creating article")
         feed = FeedController(
                 attrs.get('user_id', self.user_id)).get(id=attrs['feed_id'])
-        if 'user_id' in attrs:
-            assert feed.user_id == attrs['user_id'] or self.user_id is None, \
-                    "no right on feed %r" % feed.id
+        if 'user_id' in attrs and not (
+                feed.user_id == attrs['user_id'] or self.user_id is None):
+            raise Forbidden("no right on feed %r" % feed.id)
         attrs['user_id'], attrs['category_id'] = feed.user_id, feed.category_id
 
         skipped, read, liked = process_filters(feed.filters, attrs)
@@ -61,18 +63,18 @@ class ArticleController(AbstractController):
         cluster_contr.clusterize(article, read, liked)
         return article
 
-    def update(self, filters, attrs, *args, **kwargs):
+    def update(self, filters, attrs, return_objs=False, commit=True):
         user_id = attrs.get('user_id', self.user_id)
         if 'feed_id' in attrs:
             feed = FeedController().get(id=attrs['feed_id'])
-            assert self.user_id is None or feed.user_id == user_id, \
-                    "no right on feed %r" % feed.id
+            if not (self.user_id is None or feed.user_id == user_id):
+                raise Forbidden("no right on feed %r" % feed.id)
             attrs['category_id'] = feed.category_id
         if attrs.get('category_id'):
             cat = CategoryController().get(id=attrs['category_id'])
-            assert self.user_id is None or cat.user_id == user_id, \
-                    "no right on cat %r" % cat.id
-        return super().update(filters, attrs, *args, **kwargs)
+            if not (self.user_id is None or cat.user_id == user_id):
+                raise Forbidden("no right on cat %r" % cat.id)
+        return super().update(filters, attrs, return_objs, commit)
 
     def get_history(self, year=None, month=None):
         "Sort articles by year and month."
@@ -114,9 +116,9 @@ class ArticleController(AbstractController):
         else:
             if cluster.main_article_id == article.id:
                 cluster.main_article_id = None
-                clu_ctrl._enrich_cluster(cluster, new_art,
-                                         cluster.read, cluster.liked,
-                                         force_article_as_main=True)
+                clu_ctrl.enrich_cluster(cluster, new_art,
+                                        cluster.read, cluster.liked,
+                                        force_article_as_main=True)
         self.update({'id': article.id},
                     {'cluster_id': None,
                      'cluster_reason': None,
@@ -126,7 +128,7 @@ class ArticleController(AbstractController):
         return
 
     @staticmethod
-    def _delete(article, commit):
+    def delete_article_n_tags(article, commit):
         session.query(Tag).filter(Tag.article_id == article.id).delete()
         session.delete(article)
         if commit:
@@ -137,4 +139,4 @@ class ArticleController(AbstractController):
     def delete(self, obj_id, commit=True):
         article = self.get(id=obj_id)
         self.remove_from_cluster(article)
-        return self._delete(article, commit=commit)
+        return self.delete_article_n_tags(article, commit=commit)

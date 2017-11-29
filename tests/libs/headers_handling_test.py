@@ -30,7 +30,7 @@ class HeadersHandlingTest(unittest.TestCase):
                 extract_feed_info({'expires': 'garbage'})['expires'])
 
     def test_extract_max_age(self):
-        max_age = conf.FEED_MAX_EXPIRES / 2
+        max_age = conf.feed.max_expires / 2
         headers = {'cache-control': 'garbage max-age=%d garbage' % max_age}
         assert_in_range(extract_feed_info(headers)['expires'],
                         utc_now() + timedelta(seconds=max_age))
@@ -53,7 +53,7 @@ class HeadersHandlingTest(unittest.TestCase):
     def test_lower_bound(self):
         headers = {'cache-control': 'max-age=%d' % (conf.feed.min_expires / 2)}
         assert_in_range(extract_feed_info(headers)['expires'],
-                utc_now() + timedelta(seconds=conf.FEED_MIN_EXPIRES * 1.2))
+                utc_now() + timedelta(seconds=conf.feed.min_expires * 1.2))
 
     def test_upper_bound(self):
         headers = {'cache-control': 'max-age=%d' % (conf.feed.max_expires * 2)}

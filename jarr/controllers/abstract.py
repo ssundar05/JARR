@@ -95,9 +95,9 @@ class AbstractController:
         assert attrs, "attributes to update must not be empty"
         if self._user_id_key is not None and self._user_id_key not in attrs:
             attrs[self._user_id_key] = self.user_id
-        assert self._user_id_key is None or self._user_id_key in attrs \
-                or self.user_id is None, \
-                "You must provide user_id one way or another"
+        if not (self._user_id_key is None or self._user_id_key in attrs
+                or self.user_id is None):
+            raise Unauthorized("You must provide user_id one way or another")
 
         obj = self._db_cls(**attrs)
         session.add(obj)

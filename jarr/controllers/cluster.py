@@ -96,11 +96,12 @@ class ClusterController(AbstractController):
         cluster.read = bool(cluster_read)
         cluster.liked = cluster_liked
         article.cluster_reason = ClusterReason.original
-        self._enrich_cluster(cluster, article, cluster_read, cluster_liked)
+        self.enrich_cluster(cluster, article, cluster_read, cluster_liked)
 
-    def _enrich_cluster(self, cluster, article,
-                        cluster_read=None, cluster_liked=False,
-                        force_article_as_main=False):
+    @staticmethod
+    def enrich_cluster(cluster, article,
+                       cluster_read=None, cluster_liked=False,
+                       force_article_as_main=False):
         article.cluster = cluster
         # a cluster
         if cluster_read is not None:
@@ -127,8 +128,8 @@ class ClusterController(AbstractController):
             if not cluster:
                 cluster = self._get_cluster_by_similarity(article)
         if cluster:
-            return self._enrich_cluster(cluster, article,
-                                        cluster_read, cluster_liked)
+            return self.enrich_cluster(cluster, article,
+                                       cluster_read, cluster_liked)
         return self._create_from_article(article, cluster_read, cluster_liked)
 
     #
@@ -178,7 +179,8 @@ class ClusterController(AbstractController):
                                       *filters))\
                     .filter(exist_query)
 
-    def _iter_on_query(self, query, filter_on_category):
+    @staticmethod
+    def _iter_on_query(query, filter_on_category):
         """For a given query will iter on it, transforming raw rows to proper
         dictionnaries and handling the agreggation around feeds_id and
         categories_id.
@@ -272,7 +274,7 @@ class ClusterController(AbstractController):
         actrl = ArticleController(self.user_id)
         if delete_articles:
             for art in actrl.read(cluster_id=obj_id):
-                actrl._delete(art, commit=False)
+                actrl.delete_article_n_tags(art, commit=False)
         else:
             actrl.update({'cluster_id': obj_id},
                          {'cluster_id': None,
@@ -287,7 +289,7 @@ class ClusterController(AbstractController):
     #
 
     @classmethod
-    def _extra_columns(cls, role, right):
+    def _extra_columns(cls, role, right=None):
         return {'articles': {'type': list}}
 
     def count_by_feed(self, **filters):

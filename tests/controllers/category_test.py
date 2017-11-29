@@ -10,7 +10,7 @@ class CategoryControllerTest(BaseJarrTest):
         cat = CategoryController(2).read()[0].dump()
         self.assertEqual(3,
                 ArticleController().read(category_id=cat['id']).count())
-        self.assertEqual(3,
+        self.assertEqual(1,
                 FeedController().read(category_id=cat['id']).count())
         self._test_controller_rights(cat,
                 UserController().get(id=cat['user_id']))

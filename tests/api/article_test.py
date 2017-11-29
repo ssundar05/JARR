@@ -146,7 +146,7 @@ class ArticleApiTest(JarrFlaskCommon, ApiCommon):
         feed = resp.json()[0]
         resp = self._api('put', self.urn, obj['id'], user='user1',
                          data={'feed_id': feed['id']})
-        self.assertStatusCode(400, resp)
+        self.assertStatusCode(403, resp)
 
     def test_api_edit_category_id(self):
         resp = self._api('get', self.urns, data={'limit': 1}, user='user1')
@@ -159,4 +159,4 @@ class ArticleApiTest(JarrFlaskCommon, ApiCommon):
         category = resp.json()[0]
         resp = self._api('put', self.urn, obj['id'], user='user1',
                          data={'category_id': category['id']})
-        self.assertStatusCode(400, resp)
+        self.assertStatusCode(403, resp)
