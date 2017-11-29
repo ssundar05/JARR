@@ -29,7 +29,8 @@ def query_jarr(method_name, urn, conf, pool=None, data=None):
     if data is None:
         data = {}
     method = getattr(requests, method_name)
-    url = "%s%s/%s" % (conf.platform_url, conf.api_root.strip('/'), urn)
+    url = "/".join(str_.strip('/') for str_ in (conf.platform_url,
+                   conf.api_root.strip('/'), urn))
 
     future = loop.run_in_executor(None,
             partial(method, url, auth=auth, timeout=conf.crawler.timeout,
