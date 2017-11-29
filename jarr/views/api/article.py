@@ -6,8 +6,8 @@ from flask_restful import Api
 
 from jarr.bootstrap import conf
 from jarr.controllers import ArticleController
-from jarr.views.api.common import (PyAggAbstractResource, PyAggResourceExisting,
-                                  PyAggResourceMulti, PyAggResourceNew)
+from jarr.views.api.common import (PyAggAbstractResource,
+        PyAggResourceExisting, PyAggResourceMulti, PyAggResourceNew)
 from jarr.views.common import api_permission
 
 logger = logging.getLogger(__name__)

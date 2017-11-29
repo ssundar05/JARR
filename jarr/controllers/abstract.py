@@ -77,7 +77,6 @@ class AbstractController:
             filters[self._user_id_key] = self.user_id
         return session.query(self._db_cls).filter(*self._to_filters(**filters))
 
-
     def get(self, **filters):
         """Will return one single objects corresponding to filters"""
         obj = self._get(**filters).first()

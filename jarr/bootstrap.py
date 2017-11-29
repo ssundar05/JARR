@@ -62,7 +62,7 @@ conf = TheConf({'config_files': ['/etc/jarr.json', '~/.config/jarr.json'],
                       {'stop_fetch': {'default': 30, 'type': int}}]},
             {'webserver': [{'host': {'default': '0.0.0.0'}},
                            {'port': {'default': 5000, 'type': int}}]},
-            ]})
+                      ]})
 
 
 def set_logging(log_path=None, log_level=logging.INFO, modules=(),

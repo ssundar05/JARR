@@ -2,8 +2,8 @@ from flask_restful import Api
 
 from jarr.bootstrap import conf
 from jarr.controllers.feed import DEFAULT_LIMIT, FeedController
-from jarr.views.api.common import (PyAggAbstractResource, PyAggResourceExisting,
-                                  PyAggResourceMulti, PyAggResourceNew)
+from jarr.views.api.common import (PyAggAbstractResource,
+        PyAggResourceExisting, PyAggResourceMulti, PyAggResourceNew)
 from jarr.views.common import api_permission
 
 

@@ -51,7 +51,6 @@ def user(user_id=None):
             unread_counts=clu_contr.count_by_feed(read=False))
 
 
-
 @admin_bp.route('/toggle_user/<int:user_id>', methods=['GET'])
 @login_required
 @admin_permission.require()

@@ -11,7 +11,8 @@ from jarr_common import reasons
 from jarr_common.article_utils import construct_article, get_skip_and_ids
 from jarr_common.feed_utils import construct_feed_from, is_parsing_ok
 from jarr_common.utils import default_handler, jarr_get, to_hash, utc_now
-from jarr_crawler.lib.headers_handling import prepare_headers, extract_feed_info
+from jarr_crawler.lib.headers_handling import (prepare_headers,
+        extract_feed_info)
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
