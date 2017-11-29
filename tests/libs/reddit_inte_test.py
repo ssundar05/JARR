@@ -1,5 +1,5 @@
 import unittest
-from jarr_common import feed_creation, entry_parsing
+from jarr.bootstrap import feed_creation, entry_parsing
 
 CONTENT = """<table><tr><td>
 <a href="https://www.reddit.com/r/Map_Porn/comments/5mxq4o/\

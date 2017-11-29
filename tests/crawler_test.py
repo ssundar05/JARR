@@ -66,6 +66,8 @@ class CrawlerTest(JarrFlaskCommon):
 
         self.jarr_con.return_value = {}
         self.jarr_req.side_effect = _api_req
+        conf.crawler.login = 'admin'
+        conf.crawler.passwd = 'admin'
 
     def tearDown(self):
         super().tearDown()
@@ -89,7 +91,7 @@ class CrawlerTest(JarrFlaskCommon):
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
         self.assertEqual(36, len(resp.json()))
 
-        crawler('admin', 'admin')
+        crawler(conf)
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
         self.assertEqual(36 + self.new_entries_cnt, len(resp.json()))
 
@@ -98,7 +100,7 @@ class CrawlerTest(JarrFlaskCommon):
             self.assertFalse('src="/' in art['content'])
 
         self.resp_status_code = 304
-        crawler('admin', 'admin')
+        crawler(conf)
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
         self.assertEqual(36 + self.new_entries_cnt, len(resp.json()))
 
@@ -107,7 +109,7 @@ class CrawlerTest(JarrFlaskCommon):
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
         self.assertEqual(36, len(resp.json()))
 
-        crawler('admin', 'admin')
+        crawler(conf)
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
         self.assertEqual(36, len(resp.json()))
 
@@ -128,7 +130,7 @@ class CrawlerTest(JarrFlaskCommon):
                                                   "pattern": "pattern5",
                                                   "action": "skipped"}]})
 
-        crawler('admin', 'admin')
+        crawler(conf)
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
         self.assertEqual(36, len(resp.json()))
 
@@ -138,21 +140,21 @@ class CrawlerTest(JarrFlaskCommon):
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
         self.assertEqual(36, len(resp.json()))
 
-        crawler('admin', 'admin')
+        crawler(conf)
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
         self.assertEqual(36, len(resp.json()))
 
         self._reset_feeds_freshness(etag='jarr/"%s"' % to_hash(self._content))
         self.resp_headers = {'etag': 'jarr/"%s"' % to_hash(self._content)}
 
-        crawler('admin', 'admin')
+        crawler(conf)
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
         self.assertEqual(36, len(resp.json()))
 
         self._reset_feeds_freshness(etag='jarr/fake etag')
         self.resp_headers = {'etag': '########################'}
 
-        crawler('admin', 'admin')
+        crawler(conf)
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
         self.assertEqual(36 + self.new_entries_cnt, len(resp.json()))
 

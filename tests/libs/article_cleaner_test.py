@@ -14,7 +14,7 @@ class ConstructArticleTest(unittest.TestCase):
                    'les-plus-belles-boulangeries-de-paris'
 
     def setUp(self):
-        self._jarr_get_patch = patch('lib.article_utils.jarr_get')
+        self._jarr_get_patch = patch('jarr_common.article_utils.jarr_get')
         self.jarr_get_patch = self._jarr_get_patch.start()
 
     def tearDown(self):
@@ -78,8 +78,8 @@ class ConstructArticleTest(unittest.TestCase):
         self.assertEqual(1, article['user_id'])
         self.assertEqual(1, article['feed_id'])
 
-    @patch('lib.clustering_af.word_utils.get_stemmer')
-    @patch('lib.clustering_af.word_utils.get_stopwords')
+    @patch('jarr_common.clustering_af.word_utils.get_stemmer')
+    @patch('jarr_common.clustering_af.word_utils.get_stopwords')
     def test_tags(self, get_stopwords, get_stemmer):
         get_stemmer.return_value = FakeStemmer()
         get_stopwords.return_value = []

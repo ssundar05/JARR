@@ -113,7 +113,8 @@ engine, session, Base = load_db()
 
 def init_integrations():
     from jarr import integrations
-    return integrations
+    return signal('article_parsing'), signal('feed_creation'), \
+            signal('entry_parsing'), integrations
 
 
-init_integrations()
+article_parsing, feed_creation, entry_parsing, _ = init_integrations()

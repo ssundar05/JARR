@@ -54,7 +54,7 @@ class HTMLParsingTest(unittest.TestCase):
         self.assertEqual(yt_feed_link,
                           extract_feed_link(self.article2, feed_split))
 
-    @patch('lib.html_parsing.try_get_icon_url')
+    @patch('jarr_common.html_parsing.try_get_icon_url')
     def test_extract_icon_url(self, get_icon_patch):
         def return_first_val(*a, **kwargs):
             return a[0]

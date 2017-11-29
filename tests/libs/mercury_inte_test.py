@@ -2,7 +2,7 @@ import unittest
 
 from mock import patch, Mock
 
-from jarr_common import article_parsing
+from jarr.bootstrap import article_parsing
 
 SAMPLE = """<a href="link_to_correct.html">
 <img src="http://is_ok.com/image"/>
@@ -47,9 +47,9 @@ class MercuryIntegrationTest(unittest.TestCase):
                              mercury_may_parse=True, mercury_parse=True)
         self.assertFalse('content' in cluster.main_article)
 
-    @patch('lib.integrations.mercury.jarr_get')
-    @patch('lib.integrations.mercury.flash')
-    @patch('lib.integrations.mercury.ArticleController')
+    @patch('jarr.integrations.mercury.jarr_get')
+    @patch('jarr.integrations.mercury.flash')
+    @patch('jarr.integrations.mercury.ArticleController')
     def test_parsing(self, artc, flash, jarr_get):
         jarr_get.return_value.json.return_value = {}
         user, feed, cluster = self.base_objs

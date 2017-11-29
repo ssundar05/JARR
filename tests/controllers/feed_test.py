@@ -44,7 +44,7 @@ class FeedControllerTest(BaseJarrTest):
 
     def test_feed_rights(self):
         feed = FeedController(2).read()[0].dump()
-        self.assertTrue(3,
+        self.assertEqual(3,
                 ArticleController().read(feed_id=feed['id']).count())
         self._test_controller_rights(feed,
                 UserController().get(id=feed['user_id']))
@@ -124,8 +124,8 @@ class FeedControllerTest(BaseJarrTest):
         total = fctrl.read().count()
         unix = datetime(1970, 1, 1, tzinfo=timezone.utc)
 
-        half = timedelta(seconds=conf.FEED_MIN_EXPIRES / 2)
-        twice = timedelta(seconds=conf.FEED_MIN_EXPIRES * 2)
+        half = timedelta(seconds=conf.feed.min_expires / 2)
+        twice = timedelta(seconds=conf.feed.min_expires * 2)
 
         fctrl.update({}, {'expires': unix, 'last_retrieved': now + half})
         self.assert_late_count(0, "all have just been retrieved, none expired")

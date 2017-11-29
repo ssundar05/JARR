@@ -106,7 +106,7 @@ class BaseUiTest(JarrFlaskCommon):
         self.assertStatusCode(200, resp)
         self.assertTrue((login_form % self.user2.login) in resp.data.decode())
 
-    @patch('lib.emails.send')
+    @patch('jarr_common.emails.send')
     def test_password_recovery(self, mock_emails_send):
         self.app.get('/logout')
         self.assertEqual('', self.user.renew_password_token)
