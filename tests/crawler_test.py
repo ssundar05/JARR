@@ -34,8 +34,8 @@ class CrawlerTest(JarrFlaskCommon):
         UserController().update({'login': 'admin'}, {'is_api': True})
         self._is_secure_served \
                 = patch('jarr.lib.article_cleaner.is_secure_served')
-        self._p_req = patch('crawler.http_crawler.requests.api.request')
-        self._p_con = patch('crawler.http_crawler.construct_feed_from')
+        self._p_req = patch('jarr_crawler.http_crawler.requests.api.request')
+        self._p_con = patch('jarr_crawler.http_crawler.construct_feed_from')
         self.is_secure_served = self._is_secure_served.start()
         self.jarr_req = self._p_req.start()
         self.jarr_con = self._p_con.start()
@@ -181,7 +181,7 @@ class CrawlerMethodsTest(unittest.TestCase):
         self.assertTrue(response_etag_match(self.feed, self.resp))
         self.assertFalse(response_calculated_etag_match(self.feed, self.resp))
 
-    @patch('crawler.http_crawler.query_jarr')
+    @patch('jarr_crawler.http_crawler.query_jarr')
     def test_set_feed_error_w_error(self, query_jarr):
         original_error_count = self.feed['error_count']
         set_feed_error(self.feed, self.auth, self.pool, Exception('an error'))
@@ -192,7 +192,7 @@ class CrawlerMethodsTest(unittest.TestCase):
         self.assertEqual(original_error_count + 1, data['error_count'])
         self.assertEqual('an error', data['last_error'])
 
-    @patch('crawler.http_crawler.query_jarr')
+    @patch('jarr_crawler.http_crawler.query_jarr')
     def test_set_feed_error_w_parsed(self, query_jarr):
         original_error_count = self.feed['error_count']
         set_feed_error(self.feed, ('admin', 'admin'), self.pool,
@@ -203,7 +203,7 @@ class CrawlerMethodsTest(unittest.TestCase):
         self.assertEqual(original_error_count + 1, data['error_count'])
         self.assertEqual('an error', data['last_error'])
 
-    @patch('crawler.http_crawler.query_jarr')
+    @patch('jarr_crawler.http_crawler.query_jarr')
     def test_clean_feed(self, query_jarr):
         clean_feed(self.feed, self.auth, self.pool, self.resp)
         method, urn, data = get_first_call(query_jarr)
@@ -216,7 +216,7 @@ class CrawlerMethodsTest(unittest.TestCase):
         self.assertTrue('site_link' not in data)
         self.assertTrue('icon_url' not in data)
 
-    @patch('crawler.http_crawler.query_jarr')
+    @patch('jarr_crawler.http_crawler.query_jarr')
     def test_clean_feed_update_link(self, query_jarr):
         self.resp.history.append(Mock(status_code=301))
         self.resp.url = 'new_link'
@@ -231,8 +231,8 @@ class CrawlerMethodsTest(unittest.TestCase):
         self.assertTrue('site_link' not in data)
         self.assertTrue('icon_url' not in data)
 
-    @patch('crawler.http_crawler.construct_feed_from')
-    @patch('crawler.http_crawler.query_jarr')
+    @patch('jarr_crawler.http_crawler.construct_feed_from')
+    @patch('jarr_crawler.http_crawler.query_jarr')
     def test_clean_feed_w_constructed(self, query_jarr, construct_feed_mock):
         construct_feed_mock.return_value = {'description': 'new description'}
         clean_feed(self.feed, self.auth, self.pool, self.resp, True)

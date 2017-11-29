@@ -8,7 +8,7 @@ from alembic import context
 from flask import current_app
 from sqlalchemy import engine_from_config, pool
 
-from jarr.bootstrap import set_logging
+from jarr.bootstrap import conf, set_logging
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -21,8 +21,7 @@ set_logging(modules=('root', 'sqlalchemy'), log_format=log_format,
             log_level=logging.WARNING)
 set_logging(modules=('alembic'), log_format=log_format)
 
-config.set_main_option('sqlalchemy.url',
-        current_app.config.get('SQLALCHEMY_DATABASE_URI'))
+config.set_main_option('sqlalchemy.url', conf.sqlalchemy.db_uri)
 target_metadata = current_app.extensions['migrate'].db.metadata
 
 

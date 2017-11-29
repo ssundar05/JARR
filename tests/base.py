@@ -7,6 +7,7 @@ from base64 import b64encode
 from flask_login import login_user, logout_user
 from flask_testing import TestCase
 from werkzeug.exceptions import NotFound
+from the_conf import TheConf
 
 from wsgi import create_app
 from jarr.bootstrap import conf, engine, session, Base
@@ -63,6 +64,7 @@ class BaseJarrTest(TestCase):
         populate_db()
 
     def tearDown(self):
+        TheConf._TheConf__instance = None
         session.close()
 
 

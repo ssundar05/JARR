@@ -125,8 +125,9 @@ class ArticleController(AbstractController):
                      'cluster_tfidf_neighbor_size': None})
         return
 
-    def _delete(self, article, commit):
-        Tag.query.filter(Tag.article_id == article.id).delete()
+    @staticmethod
+    def _delete(article, commit):
+        session.query(Tag).filter(Tag.article_id == article.id).delete()
         session.delete(article)
         if commit:
             session.flush()

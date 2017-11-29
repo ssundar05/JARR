@@ -65,7 +65,7 @@ def link_sqalchemy_to_app(app):
 
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder="jarr/templates")
     app.config.from_object(conf)
     if conf.jarr_testing:
         app.debug = True
