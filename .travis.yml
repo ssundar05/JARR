@@ -22,14 +22,14 @@ addons:
       - libpq-dev
 
 install:
-  - python3 ./install.py --test --no-db
+  #- python3 ./install.py --test --no-db
+  - pip3 install -r requirements.txt -r requirements.postgres.txt -r requirements.dev.txt --upgrade
   - npm install
   - npm run build
 
 before_script:
   - psql -c 'CREATE DATABASE jarr_test;' -U postgres
-  - sed -e 's|sqlite:///:memory:|postgres:///jarr_test|g' -i ~/.config/jarr.json
-  - pip install -r requirements.postgres.txt
+  - echo '{"crawler":{"login":"admin","passwd":"admin"},"log":{"level":10},"sqlalchemy":{"db_uri":"postgres:///jarr_test"}}' > ~/.config/jarr.json
 
 script:
   - nosetests -v --with-coverage --cover-package=jarr,jarr_common,jarr_crawler
