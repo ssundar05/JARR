@@ -59,6 +59,7 @@ class BaseJarrTest(TestCase):
         self.assertRaises(NotFound, self._contr_cls(user.id).delete, obj_id)
 
     def setUp(self):
+        conf.jarr_testing = True
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
         populate_db()
