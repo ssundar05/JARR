@@ -9,13 +9,13 @@
   "description": "jarr (Just Another RSS Reader) is a web-based news aggregator.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/JARR-aggregator/JARR"
+    "url": "https://github.com/jaesivsm/JARR"
   },
   "license": "GNU Affero General Public License version 3",
   "engines": {
     "npm": "^3.3.12"
   },
-  "main": "src/web/js/app.js",
+  "main": "jarr/views/js/app.js",
   "dependencies": {
     "bootstrap": "^3.3.7",
     "classnames": "^2.2.5",
@@ -36,8 +36,8 @@
     "watchify": "^3.7.0"
   },
   "scripts": {
-    "start": "watchify -o src/web/static/js/bundle.min.js -v -d src/web/js/app.js",
-    "build": "browserify . -t [envify --NODE_ENV production] | uglifyjs -cm > src/web/static/js/bundle.min.js"
+    "start": "watchify -o src/web/static/js/bundle.min.js -v -d jarr/views/js/app.js",
+    "build": "browserify . -t [envify --NODE_ENV production] | uglifyjs -cm > jarr/views/static/js/bundle.min.js"
   },
   "browserify": {
     "transform": [
