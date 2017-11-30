@@ -32,7 +32,7 @@ before_script:
   - echo '{"jarr_testing":true,"crawler":{"login":"admin","passwd":"admin"},"log":{"level":10},"sqlalchemy":{"test_uri":"postgres:///jarr_test","db_uri":"postgres:///jarr_test"}}' > ~/.config/jarr.json
 
 script:
-  - JARR_TESTING=true nosetests tests/views/home_test.py -vvv --with-coverage --cover-package=jarr,jarr_common,jarr_crawler
+  - JARR_TESTING=true nosetests tests/ -v --with-coverage --cover-package=jarr,jarr_common,jarr_crawler
   # ignoring aligning / line breaking non-sens
   - pep8 --ignore=E126,E127,E128,W503 jarr/ --exclude=jarr/migrations,__pycache__
   - pep8 --ignore=E126,E127,E128,W503 jarr_crawler/ --exclude=__pycache__
