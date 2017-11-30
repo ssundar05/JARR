@@ -93,13 +93,14 @@ def init_logging(log_path=None, log_level=logging.INFO, modules=(),
         logger.setLevel(log_level)
 
 
-def init_db(echo=False):
+def init_db(is_sqlite, echo=False):  # pragma: no cover
+    kwargs = {'echo': echo}
+    if is_sqlite:
+        kwargs['connect_args'] = {'check_same_thread':False}
     if conf.jarr_testing:
-        new_engine = create_engine(conf.sqlalchemy.test_uri, echo=echo,
-                                   connect_args={'check_same_thread':False})
-    else:  #
-        new_engine = create_engine(conf.sqlalchemy.db_uri, echo=echo,
-                                   pool_recycle=3600)
+        new_engine = create_engine(conf.sqlalchemy.test_uri, **kwargs)
+    else:
+        new_engine = create_engine(conf.sqlalchemy.db_uri, **kwargs)
     NewBase = declarative_base(new_engine)
     Session = sessionmaker(bind=new_engine)
     new_session = Session()
@@ -122,6 +123,6 @@ SQLITE_ENGINE = 'sqlite' in get_db_uri()
 PARSED_PLATFORM_URL = urlparse(conf.platform_url)
 
 init_logging(conf.log.path, log_level=conf.log.level)
-engine, session, Base = init_db()
+engine, session, Base = init_db(SQLITE_ENGINE)
 article_parsing, feed_creation, entry_parsing, _ = init_integrations()
 init_models()
