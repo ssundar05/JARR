@@ -10,7 +10,7 @@ from werkzeug.exceptions import NotFound
 from the_conf import TheConf
 
 from wsgi import create_app
-from jarr.bootstrap import conf, engine, session, Base
+from jarr.bootstrap import conf, session, engine, Base
 from jarr_common.utils import default_handler
 from tests.fixtures.filler import populate_db
 
@@ -19,9 +19,10 @@ logger = logging.getLogger('jarr')
 
 
 class BaseJarrTest(TestCase):
-    _contr_cls = None
+    _contr_cls = lambda x=1: None
     SQLALCHEMY_DATABASE_URI = conf.sqlalchemy.test_uri
     TESTING = True
+    _application = None
 
     def create_app(self):
         self._application = create_app()
@@ -59,7 +60,6 @@ class BaseJarrTest(TestCase):
         self.assertRaises(NotFound, self._contr_cls(user.id).delete, obj_id)
 
     def setUp(self):
-        conf.jarr_testing = True
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
         populate_db()

@@ -71,10 +71,10 @@ class CrawlerTest(JarrFlaskCommon):
         conf.crawler.passwd = 'admin'
 
     def tearDown(self):
-        super().tearDown()
         self._is_secure_served.stop()
         self._p_req.stop()
         self._p_con.stop()
+        super().tearDown()
 
     @staticmethod
     def _reset_feeds_freshness(**kwargs):
@@ -169,8 +169,6 @@ class CrawlerMethodsTest(unittest.TestCase):
                      'etag': '', 'error_count': 5, 'link': 'link'}
         self.resp = Mock(text='text', headers={}, status_code=304, history=[])
         self.pool = []
-        conf.crawler.login = 'admin'
-        conf.crawler.passwd = 'admin'
 
     def tearDown(self):
         TheConf._TheConf__instance = None

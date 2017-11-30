@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from jarr_common.utils import utc_now
-from jarr.bootstrap import session
+from jarr.bootstrap import conf, session
 from jarr.controllers import (ArticleController, CategoryController,
                               FeedController, UserController)
 from jarr.models import User, Category, Feed, Cluster, Article, Tag, Icon
@@ -17,7 +17,8 @@ def populate_db():
     acontr = ArticleController()
     ccontr = CategoryController()
     ucontr.create(**{'is_admin': True, 'is_api': True,
-                     'login': 'admin', 'password': 'admin'})
+                     'login': conf.crawler.login,
+                     'password': conf.crawler.passwd})
     user1, user2 = [ucontr.create(login=name, email="%s@test.te" % name,
                                   password=name)
                     for name in ["user1", "user2"]]

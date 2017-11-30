@@ -11,7 +11,6 @@ from blinker import signal
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
-from sqlalchemy.pool import NullPool
 
 from the_conf import TheConf
 
@@ -63,8 +62,18 @@ conf = TheConf({'config_files': ['/etc/jarr.json', '~/.config/jarr.json'],
                            {'port': {'default': 5000, 'type': int}}]},
                       ]})
 
+# utilities
 
-def set_logging(log_path=None, log_level=logging.INFO, modules=(),
+def get_db_uri():
+    return conf.sqlalchemy.test_uri \
+            if conf.jarr_testing else conf.sqlalchemy.db_uri
+
+def is_secure_served():
+    return PARSED_PLATFORM_URL.scheme == 'https'
+
+# init func
+
+def init_logging(log_path=None, log_level=logging.INFO, modules=(),
                 log_format='%(asctime)s %(levelname)s %(message)s'):
 
     if not modules:
@@ -84,30 +93,18 @@ def set_logging(log_path=None, log_level=logging.INFO, modules=(),
         logger.setLevel(log_level)
 
 
-def get_db_uri():
-    return conf.sqlalchemy.test_uri \
-            if conf.jarr_testing else conf.sqlalchemy.db_uri
-
-
-def load_db(echo=False):
-    new_engine = create_engine(get_db_uri(), echo=echo,
-                           pool_recycle=3600, poolclass=NullPool)
+def init_db(echo=False):
+    if conf.jarr_testing:
+        new_engine = create_engine(conf.sqlalchemy.test_uri, echo=echo,
+                                   connect_args={'check_same_thread':False})
+    else:  #
+        new_engine = create_engine(conf.sqlalchemy.db_uri, echo=echo,
+                                   pool_recycle=3600)
     NewBase = declarative_base(new_engine)
     Session = sessionmaker(bind=new_engine)
     new_session = Session()
+
     return new_engine, new_session, NewBase
-
-
-SQLITE_ENGINE = 'sqlite' in get_db_uri()
-PARSED_PLATFORM_URL = urlparse(conf.platform_url)
-
-
-def is_secure_served():
-    return PARSED_PLATFORM_URL.scheme == 'https'
-
-
-set_logging(conf.log.path, log_level=conf.log.level)
-engine, session, Base = load_db()
 
 
 def init_integrations():
@@ -116,5 +113,15 @@ def init_integrations():
             signal('entry_parsing'), integrations
 
 
+def init_models():
+    from jarr import models
+    return models
+
+
+SQLITE_ENGINE = 'sqlite' in get_db_uri()
+PARSED_PLATFORM_URL = urlparse(conf.platform_url)
+
+init_logging(conf.log.path, log_level=conf.log.level)
+engine, session, Base = init_db()
 article_parsing, feed_creation, entry_parsing, _ = init_integrations()
-print(conf.jarr_testing, get_db_uri())
+init_models()
