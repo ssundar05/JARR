@@ -64,10 +64,6 @@ conf = TheConf({'config_files': ['/etc/jarr.json', '~/.config/jarr.json'],
 
 # utilities
 
-def get_db_uri():
-    return conf.sqlalchemy.test_uri \
-            if conf.jarr_testing else conf.sqlalchemy.db_uri
-
 def is_secure_served():
     return PARSED_PLATFORM_URL.scheme == 'https'
 
@@ -119,7 +115,8 @@ def init_models():
     return models
 
 
-SQLITE_ENGINE = 'sqlite' in get_db_uri()
+SQLITE_ENGINE = 'sqlite' in (conf.sqlalchemy.test_uri
+            if conf.jarr_testing else conf.sqlalchemy.db_uri)
 PARSED_PLATFORM_URL = urlparse(conf.platform_url)
 
 init_logging(conf.log.path, log_level=conf.log.level)
