@@ -34,9 +34,9 @@ before_script:
 script:
   - nosetests tests/ -v --with-coverage --cover-package=jarr,jarr_common,jarr_crawler
   # ignoring aligning / line breaking non-sens
-  - pep8 --ignore=E126,E127,E128,W503 jarr/ --exclude=jarr/migrations,__pycache__
-  - pep8 --ignore=E126,E127,E128,W503 jarr_crawler/ --exclude=__pycache__
-  - pep8 --ignore=E126,E127,E128,W503 jarr_common/ --exclude=__pycache__
+  - pycodestyle --ignore=E126,E127,E128,W503 jarr/ --exclude=jarr/migrations
+  - pycodestyle --ignore=E126,E127,E128,W503 jarr_crawler/
+  - pycodestyle --ignore=E126,E127,E128,W503 jarr_common/
 
 after_success:
   - coveralls
