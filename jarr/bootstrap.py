@@ -64,10 +64,12 @@ conf = TheConf({'config_files': ['/etc/jarr.json', '~/.config/jarr.json'],
 
 # utilities
 
+
 def is_secure_served():
     return PARSED_PLATFORM_URL.scheme == 'https'
 
 # init func
+
 
 def init_logging(log_path=None, log_level=logging.INFO, modules=(),
                 log_format='%(asctime)s %(levelname)s %(message)s'):
@@ -92,7 +94,7 @@ def init_logging(log_path=None, log_level=logging.INFO, modules=(),
 def init_db(is_sqlite, echo=False):  # pragma: no cover
     kwargs = {'echo': echo}
     if is_sqlite:
-        kwargs['connect_args'] = {'check_same_thread':False}
+        kwargs['connect_args'] = {'check_same_thread': False}
     if conf.jarr_testing:
         new_engine = create_engine(conf.sqlalchemy.test_uri, **kwargs)
     else:
