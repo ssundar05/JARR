@@ -24,8 +24,8 @@ def populate_db():
                     for name in ["user1", "user2"]]
     now = utc_now()
 
+    article_total = 0
     for k in range(2):
-        article_total = 0
 
         def to_name(u, iter_, cat=None, feed=None, art=None, *args):
             string = "i%d %s" % (iter_, u.login)
