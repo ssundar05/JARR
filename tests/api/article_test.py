@@ -9,17 +9,19 @@ class ArticleApiTest(JarrFlaskCommon, ApiCommon):
     urns = 'articles'
 
     def test_api_list(self):
+        feed_id = next(feed['id']
+                for feed in self._api('get', 'feeds', user='user1').json())
+        category_id = next(cat['id']
+                for cat in self._api('get', 'categories', user='user1').json())
         resp = self._api('get', self.urns,
-                         data={'feed_id': 1, 'order_by': '-id'},
+                         data={'feed_id': feed_id, 'order_by': '-id'},
                          user='user1')
         self.assertStatusCode(200, resp)
         self.assertEqual(3, len(resp.json()))
         self.assertTrue(resp.json()[0]['id'] > resp.json()[-1]['id'])
 
-        import ipdb
-        ipdb.sset_trace()
         resp = self._api('get', self.urns,
-                         data={'category_id': 1}, user='user1')
+                         data={'category_id': category_id}, user='user1')
         self.assertStatusCode(200, resp)
         self.assertEqual(3, len(resp.json()))
 
