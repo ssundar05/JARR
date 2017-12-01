@@ -8,9 +8,9 @@ from jarr.models import User, Category, Feed, Cluster, Article, Tag, Icon
 
 
 def populate_db():
-    session.query(Cluster).update({'main_article_id': None})
-    for table in Tag, Article, Cluster, Feed, Icon, Category, User:
-        session.query(table).delete()
+    #session.query(Cluster).update({'main_article_id': None})
+    #for table in Tag, Article, Cluster, Feed, Icon, Category, User:
+    #    session.query(table).delete()
     ucontr = UserController()
     ccontr = CategoryController()
     fcontr = FeedController()

@@ -10,7 +10,7 @@ from werkzeug.exceptions import NotFound
 from the_conf import TheConf
 
 from wsgi import create_app
-from jarr.bootstrap import conf, session, engine, Base
+from jarr.bootstrap import conf, session, Base, init_db, SQLITE_ENGINE
 from jarr_common.utils import default_handler
 from tests.fixtures.filler import populate_db
 
@@ -59,12 +59,22 @@ class BaseJarrTest(TestCase):
                 self._contr_cls(user.id).delete(obj_id).id)
         self.assertRaises(NotFound, self._contr_cls(user.id).delete, obj_id)
 
+    @staticmethod
+    def _drop_all():
+        for table in ('tag', 'article', 'cluster', 'feed', 'category',
+                      '"user"', 'icon'):
+            session.execute('DROP TABLE IF EXISTS %s CASCADE' % table)
+        session.commit()
+        session.flush()
+
     def setUp(self):
-        Base.metadata.drop_all(engine)
-        Base.metadata.create_all(engine)
+        init_db(SQLITE_ENGINE)
+        self._drop_all()
+        Base.metadata.create_all()
         populate_db()
 
     def tearDown(self):
+        self._drop_all()
         TheConf._TheConf__instance = None
         session.close()
 

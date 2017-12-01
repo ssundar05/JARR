@@ -1,4 +1,5 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Index, Integer, String
+from sqlalchemy import (Boolean, Column, Integer, String,
+                        Index, ForeignKeyConstraint)
 from sqlalchemy.orm import relationship
 
 from jarr.bootstrap import Base
@@ -13,7 +14,7 @@ class Category(Base, RightMixin):
     cluster_on_title = Column(Boolean, default=False)
 
     # foreign keys
-    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    user_id = Column(Integer, nullable=False)
 
     # relationships
     user = relationship('User', back_populates='categories')
@@ -25,8 +26,11 @@ class Category(Base, RightMixin):
             foreign_keys='[Article.category_id, Article.cluster_id]',
             secondary='article')
 
-    # index
-    ix_category_uid = Index('user_id')
+    __table_args__ = (
+            ForeignKeyConstraint([user_id], ['user.id'],
+                                 ondelete='CASCADE'),
+            Index('ix_category_uid', user_id),
+    )
 
     # api whitelists
     @staticmethod

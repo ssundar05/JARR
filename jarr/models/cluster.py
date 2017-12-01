@@ -1,5 +1,5 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Index, \
-                       Integer, String, Enum
+from sqlalchemy import (Boolean, Column, Integer, String, Enum,
+                        ForeignKey, ForeignKeyConstraint, Index)
 from sqlalchemy.orm import relationship
 
 from jarr_common.utils import utc_now
@@ -30,14 +30,14 @@ class Cluster(Base, RightMixin):
     read_reason = Column(Enum(ReadReason), default=None)
 
     # foreign keys
+    user_id = Column(Integer, nullable=False)
     main_article_id = Column(Integer,
             ForeignKey('article.id', name='fk_article_id', use_alter=True))
-    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
 
     # relationships
     user = relationship('User', back_populates='clusters')
     main_article = relationship('Article', uselist=False,
-                                foreign_keys=[main_article_id])
+                                foreign_keys=main_article_id)
     articles = relationship('Article', back_populates='cluster',
             foreign_keys=[Article.cluster_id],
             order_by=Article.date.asc())
@@ -48,12 +48,15 @@ class Cluster(Base, RightMixin):
             secondary='article',
             foreign_keys=[Article.cluster_id, Article.category_id])
 
-    # index
-    ix_cluster_uid_date = Index('user_id', 'main_date DESC NULLS LAST')
-    ix_cluster_liked_uid_date = Index('liked', 'user_id',
-                                      'main_date DESC NULLS LAST')
-    ix_cluster_read_uid_date = Index('read', 'user_id',
-                                     'main_date DESC NULLS LAST')
+    __table_args__ = (
+            ForeignKeyConstraint([user_id], ['user.id'], ondelete='CASCADE'),
+            Index('ix_cluster_uid_date',
+                  user_id, main_date.desc().nullslast()),
+            Index('ix_cluster_liked_uid_date',
+                  liked, user_id, main_date.desc().nullslast()),
+            Index('ix_cluster_read_uid_date',
+                  read, user_id, main_date.desc().nullslast()),
+    )
 
     @property
     def categories_id(self):

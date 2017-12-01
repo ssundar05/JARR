@@ -60,4 +60,4 @@ class User(Base, UserMixin, RightMixin):
 
     @validates('login')
     def validates_login(self, key, value):
-        return re.sub('[^a-zA-Z0-9_\.]', '', value.strip())
+        return re.sub(r'[^a-zA-Z0-9_\.]', '', value.strip())

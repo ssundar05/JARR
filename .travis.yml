@@ -29,10 +29,10 @@ install:
 
 before_script:
   - psql -c 'CREATE DATABASE jarr_test;' -U postgres
-  - echo '{"jarr_testing":true,"crawler":{"login":"admin","passwd":"admin"},"log":{"level":10},"sqlalchemy":{"test_uri":"sqlite+pysqlite:////tmp/jarr.db","db_uri":"sqlite+pysqlite:////tmp/jarr.db"}}' > ~/.config/jarr.json
+  - echo '{"jarr_testing":true,"crawler":{"login":"admin","passwd":"admin"},"log":{"level":10},"sqlalchemy":{"test_uri":"postgres:///jarr_test"}}' > ~/.config/jarr.json
 
 script:
-  - JARR_TESTING=true nosetests tests/ -v --with-coverage --cover-package=jarr,jarr_common,jarr_crawler
+  - nosetests tests/ -v --with-coverage --cover-package=jarr,jarr_common,jarr_crawler
   # ignoring aligning / line breaking non-sens
   - pep8 --ignore=E126,E127,E128,W503 jarr/ --exclude=jarr/migrations,__pycache__
   - pep8 --ignore=E126,E127,E128,W503 jarr_crawler/ --exclude=__pycache__

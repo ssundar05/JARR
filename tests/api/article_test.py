@@ -10,7 +10,8 @@ class ArticleApiTest(JarrFlaskCommon, ApiCommon):
 
     def test_api_list(self):
         resp = self._api('get', self.urns,
-                         data={'feed_id': 1, 'order_by': '-id'},
+                         data={'title': 'i0 user1 cat1 feed1',
+                               'order_by': '-id'},
                          user='user1')
         self.assertStatusCode(200, resp)
         self.assertEqual(3, len(resp.json()))

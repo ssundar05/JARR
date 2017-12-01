@@ -1,5 +1,5 @@
-from sqlalchemy import (Boolean, Column, ForeignKey, Index, Integer,
-                        PickleType, String, Enum)
+from sqlalchemy import (Boolean, Column, Integer, PickleType, String, Enum,
+                        Index, ForeignKeyConstraint)
 from sqlalchemy.orm import relationship, validates
 
 from jarr_common.utils import utc_now
@@ -39,10 +39,9 @@ class Feed(Base, RightMixin):
     error_count = Column(Integer, default=0)
 
     # foreign keys
-    icon_url = Column(String, ForeignKey('icon.url'), default=None)
-    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
-    category_id = Column(Integer,
-                         ForeignKey('category.id', ondelete='CASCADE'))
+    icon_url = Column(String, default=None)
+    user_id = Column(Integer, nullable=False)
+    category_id = Column(Integer)
 
     # relationships
     user = relationship('User', back_populates='feeds')
@@ -53,9 +52,14 @@ class Feed(Base, RightMixin):
             foreign_keys='[Article.feed_id, Article.cluster_id]',
             secondary='article')
 
-    # index
-    ix_feed_uid = Index('user_id')
-    ix_feed_uid_cid = Index('user_id', 'category_id')
+    __table_args__ = (
+            ForeignKeyConstraint([user_id], ['user.id'], ondelete='CASCADE'),
+            ForeignKeyConstraint([category_id], ['category.id'],
+                                 ondelete='CASCADE'),
+            ForeignKeyConstraint([icon_url], ['icon.url']),
+            Index('ix_feed_uid', user_id),
+            Index('ix_feed_uid_cid', user_id, category_id),
+    )
 
     # api whitelists
     @staticmethod
