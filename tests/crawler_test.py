@@ -16,6 +16,7 @@ from jarr_common.utils import to_hash
 from jarr_common.const import UNIX_START
 
 logger = logging.getLogger('jarr')
+BASE_COUNT = 36
 
 
 def get_first_call(query_jarr):
@@ -90,11 +91,11 @@ class CrawlerTest(JarrFlaskCommon):
 
     def test_http_crawler_add_articles(self):
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
-        self.assertEqual(36, len(resp.json()))
+        self.assertEqual(BASE_COUNT, len(resp.json()))
 
         crawler(conf)
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
-        self.assertEqual(36 + self.new_entries_cnt, len(resp.json()))
+        self.assertEqual(BASE_COUNT + self.new_entries_cnt, len(resp.json()))
 
         for art in resp.json():
             self.assertFalse('srcset=' in art['content'])
@@ -103,21 +104,21 @@ class CrawlerTest(JarrFlaskCommon):
         self.resp_status_code = 304
         crawler(conf)
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
-        self.assertEqual(36 + self.new_entries_cnt, len(resp.json()))
+        self.assertEqual(BASE_COUNT + self.new_entries_cnt, len(resp.json()))
 
     def test_no_add_on_304(self):
         self.resp_status_code = 304
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
-        self.assertEqual(36, len(resp.json()))
+        self.assertEqual(BASE_COUNT, len(resp.json()))
 
         crawler(conf)
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
-        self.assertEqual(36, len(resp.json()))
+        self.assertEqual(BASE_COUNT, len(resp.json()))
 
     def test_no_add_feed_skip(self):
         self.resp_status_code = 304
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
-        self.assertEqual(36, len(resp.json()))
+        self.assertEqual(BASE_COUNT, len(resp.json()))
         FeedController().update({}, {'filters': [{"type": "tag contains",
                                                   "action on": "match",
                                                   "pattern": "pattern5",
@@ -133,31 +134,31 @@ class CrawlerTest(JarrFlaskCommon):
 
         crawler(conf)
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
-        self.assertEqual(36, len(resp.json()))
+        self.assertEqual(BASE_COUNT, len(resp.json()))
 
     def test_matching_etag(self):
         self._reset_feeds_freshness(etag='fake etag')
         self.resp_headers = {'etag': 'fake etag'}
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
-        self.assertEqual(36, len(resp.json()))
+        self.assertEqual(BASE_COUNT, len(resp.json()))
 
         crawler(conf)
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
-        self.assertEqual(36, len(resp.json()))
+        self.assertEqual(BASE_COUNT, len(resp.json()))
 
         self._reset_feeds_freshness(etag='jarr/"%s"' % to_hash(self._content))
         self.resp_headers = {'etag': 'jarr/"%s"' % to_hash(self._content)}
 
         crawler(conf)
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
-        self.assertEqual(36, len(resp.json()))
+        self.assertEqual(BASE_COUNT, len(resp.json()))
 
         self._reset_feeds_freshness(etag='jarr/fake etag')
         self.resp_headers = {'etag': '########################'}
 
         crawler(conf)
         resp = self._api('get', 'articles', data={'limit': 1000}, user='admin')
-        self.assertEqual(36 + self.new_entries_cnt, len(resp.json()))
+        self.assertEqual(BASE_COUNT + self.new_entries_cnt, len(resp.json()))
 
 
 class CrawlerMethodsTest(unittest.TestCase):
