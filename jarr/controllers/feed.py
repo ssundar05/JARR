@@ -20,7 +20,8 @@ DEFAULT_ART_SPAN_TIME = timedelta(seconds=conf.feed.max_expires)
 class FeedController(AbstractController):
     _db_cls = Feed
 
-    def __get_art_contr(self):
+    @property
+    def __actrl(self):
         from .article import ArticleController
         return ArticleController(self.user_id)
 
@@ -105,7 +106,7 @@ class FeedController(AbstractController):
 
     def __denorm_cat_id_on_articles(self, feed, attrs):
         if 'category_id' in attrs:
-            self.__get_art_contr().update({'feed_id': feed.id},
+            self.__actrl.update({'feed_id': feed.id},
                     {'category_id': attrs['category_id']})
 
     def __denorm_title_on_clusters(self, feed, attrs):
@@ -140,7 +141,7 @@ class FeedController(AbstractController):
                 expires.append(attrs['expires'])
 
         span_time = timedelta(seconds=conf.feed.max_expires)
-        art_count = self.__get_art_contr().read(feed_id=feed.id,
+        art_count = self.__actrl.read(feed_id=feed.id,
                 retrieved_date__gt=now - span_time).count()
         expires.append(now + (span_time / (art_count or 1)))
 
@@ -163,12 +164,11 @@ class FeedController(AbstractController):
     def delete(self, obj_id):
         from jarr.controllers.cluster import ClusterController
         feed = self.get(id=obj_id)
-        actrl = self.__get_art_contr()
         clu_ctrl = ClusterController(self.user_id)
 
         # removing back ref from cluster to article
-        clu_ctrl.update({'main_article_id__in': actrl.read(feed_id=obj_id)
-                                                     .with_entities('id')},
+        clu_ctrl.update({'main_article_id__in': self.__actrl.read(
+                            feed_id=obj_id).with_entities('id')},
                         {'main_article_id': None})
 
         def select_art(col):
