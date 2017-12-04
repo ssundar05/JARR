@@ -33,26 +33,27 @@ def init_babel(app):
 
 
 def load_blueprints(app):
-    from jarr import views
-    views.session_mgmt.load(app)
-    app.register_blueprint(views.articles_bp)
-    app.register_blueprint(views.cluster_bp)
-    app.register_blueprint(views.feeds_bp)
-    app.register_blueprint(views.feed_bp)
-    app.register_blueprint(views.icon_bp)
-    app.register_blueprint(views.admin_bp)
-    app.register_blueprint(views.users_bp)
-    app.register_blueprint(views.user_bp)
-    app.register_blueprint(views.session_mgmt.oauth_bp)
-    views.api.feed.load(app)
-    views.api.category.load(app)
-    views.api.cluster.load(app)
-    views.api.article.load(app)
-    views.home.load(app)
-    views.views.load(app)
+    with app.app_context():
+        from jarr import views
+        views.session_mgmt.load(app)
+        app.register_blueprint(views.articles_bp)
+        app.register_blueprint(views.cluster_bp)
+        app.register_blueprint(views.feeds_bp)
+        app.register_blueprint(views.feed_bp)
+        app.register_blueprint(views.icon_bp)
+        app.register_blueprint(views.admin_bp)
+        app.register_blueprint(views.users_bp)
+        app.register_blueprint(views.user_bp)
+        app.register_blueprint(views.session_mgmt.oauth_bp)
+        views.api.feed.load(app)
+        views.api.category.load(app)
+        views.api.cluster.load(app)
+        views.api.article.load(app)
+        views.home.load(app)
+        views.views.load(app)
 
-    app.jinja_env.filters['month_name'] = lambda n: calendar.month_name[n]
-    app.jinja_env.autoescape = False
+        app.jinja_env.filters['month_name'] = lambda n: calendar.month_name[n]
+        app.jinja_env.autoescape = False
 
 
 def param_app(app):
