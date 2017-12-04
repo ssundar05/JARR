@@ -65,6 +65,7 @@ def param_app(app):
     def session_clear(exception=None):
         if exception and session.is_active:
             session.rollback()
+        session.remove()
     return inject_conf, session_clear
 
 
