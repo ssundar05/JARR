@@ -65,7 +65,6 @@ class BaseJarrTest(TestCase):
                       '"user"', 'icon'):
             session.execute('DROP TABLE IF EXISTS %s CASCADE' % table)
         session.commit()
-        session.flush()
 
     def setUp(self):
         init_db(SQLITE_ENGINE)
@@ -76,7 +75,7 @@ class BaseJarrTest(TestCase):
     def tearDown(self):
         self._drop_all()
         TheConf._TheConf__instance = None
-        session.close()
+        session.remove()
 
 
 class JarrFlaskCommon(BaseJarrTest):

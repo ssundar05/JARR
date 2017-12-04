@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 from blinker import signal
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm.session import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 
 from the_conf import TheConf
 
@@ -100,8 +100,8 @@ def init_db(is_sqlite, echo=False):  # pragma: no cover
     else:
         new_engine = create_engine(conf.sqlalchemy.db_uri, **kwargs)
     NewBase = declarative_base(new_engine)
-    Session = sessionmaker(bind=new_engine)
-    new_session = Session()
+    SessionMaker = sessionmaker(bind=new_engine)
+    new_session = scoped_session(SessionMaker)
 
     return new_engine, new_session, NewBase
 
